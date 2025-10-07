@@ -44,7 +44,7 @@ API Docs: Swagger / OpenAPI
 
 # Clone the repository
 
-git clone https://github.com/your-username/auth-microservice.git
+git clone https://github.com/nazmul-devs/auth_rbac_server.git
 
 # Navigate to the project
 
