@@ -77,3 +77,11 @@ Multi-tenant user management
 Audit logging
 
 💡 Designed for scalability, security, and reusability across modern backend ecosystems.
+
+git clone https://github.com/your-org/auth-service.git
+cd auth-service
+pnpm install
+cp .env.example .env
+pnpm docker:up
+pnpm prisma:migrate\pnpm dev
+Access Swagger Docs → http://localhost:4000/docs

@@ -1,0 +1,66 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ======================
+// Models
+// ======================
+model User {
+  id            String         @id @default(uuid())
+  email         String         @unique
+  passwordHash  String
+  name          String?
+  isActive      Boolean        @default(true)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  roles         UserRole[]
+  refreshTokens RefreshToken[]
+}
+
+model Role {
+  id          String           @id @default(uuid())
+  name        String           @unique
+  description String?
+  permissions RolePermission[]
+  users       UserRole[]
+}
+
+model Permission {
+  id    String           @id @default(uuid())
+  name  String           @unique
+  desc  String?
+  roles RolePermission[]
+}
+
+model UserRole {
+  id     String @id @default(uuid())
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+  role   Role   @relation(fields: [roleId], references: [id])
+  roleId String
+}
+
+model RolePermission {
+  id           String     @id @default(uuid())
+  role         Role       @relation(fields: [roleId], references: [id])
+  roleId       String
+  permission   Permission @relation(fields: [permissionId], references: [id])
+  permissionId String
+}
+
+model RefreshToken {
+  id           String   @id @default(uuid())
+  tokenHash    String
+  user         User     @relation(fields: [userId], references: [id])
+  userId       String
+  revoked      Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  replacedById String? // for rotation
+  expiresAt    DateTime
+}
