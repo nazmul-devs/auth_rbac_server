@@ -1,0 +1,31 @@
+version: "3.8"
+services:
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: auth_user
+      POSTGRES_PASSWORD: auth_user_pass
+      POSTGRES_DB: auth_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7
+    ports:
+      - "6379:6379"
+
+  app:
+    build: .
+    ports:
+      - "4001:4001"
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+      - redis
+    restart: unless-stopped
+
+volumes:
+  pgdata:

@@ -1,0 +1,35 @@
+name: CI
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_USER: auth
+          POSTGRES_PASSWORD: authpass
+          POSTGRES_DB: auth_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v2
+        with:
+          version: 8
+      - name: Install deps
+        run: pnpm install
+      - name: Run migrations
+        env:
+          DATABASE_URL: postgresql://auth:authpass@localhost:5432/auth_test
+        run: pnpm prisma migrate deploy
+      - name: Run tests
+        env:
+          DATABASE_URL: postgresql://auth:authpass@localhost:5432/auth_test
+        run: pnpm test --silent
