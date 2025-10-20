@@ -11,9 +11,8 @@
     "test": "jest --passWithNoTests",
     "test:watch": "jest --watch",
     "pg": "prisma generate",
-    "pm": "prisma migrate dev --name init",
-    "du": "docker-compose up -d",
-    "dd": "docker-compose down",
+    "pm:dev": "prisma migrate dev --name init",
+    "pm:deploy": "prisma migrate deploy",
     "swagger": "npx openapi-typescript openapi.yaml -o src/types/openapi.ts",
     "ci": "pnpm lint && pnpm test && pnpm build"
   },
@@ -32,7 +31,8 @@
     "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.1",
     "swagger-ui-express": "^5.0.1",
-    "winston": "^3.18.3"
+    "winston": "^3.18.3",
+    "zod": "^4.1.12"
   },
   "devDependencies": {
     "@types/compression": "^1.8.1",

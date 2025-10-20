@@ -1,4 +1,5 @@
 version: "3.8"
+
 services:
   postgres:
     image: postgres:17
@@ -21,11 +22,13 @@ services:
     ports:
       - "4001:4001"
     env_file:
-      - .env
+      - .env.production
+
     depends_on:
       - postgres
       - redis
     restart: unless-stopped
+    command: sh -c "npx prisma migrate deploy && npm run start"
 
 volumes:
   pgdata:
