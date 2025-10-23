@@ -7,6 +7,8 @@ import { corsMiddleware } from "./core/config/cors.config";
 import { AppError } from "./core/errors/AppError";
 import { errorHandler } from "./core/errors/errorHandler";
 import { logger } from "./core/utils/logger";
+import swaggerUi from "swagger-ui-express";
+import swaggerSpec from "./api/docs/swagger";
 
 const app: Application = express();
 
@@ -34,6 +36,9 @@ const limiter = rateLimit({
   message: "Too many requests, please try again later.",
 });
 app.use("/api", limiter);
+
+// Swagger route
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 /* Health Check -------------------- */
 app.get("/health", (_req: Request, res: Response) => {

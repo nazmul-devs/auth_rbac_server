@@ -1,7 +1,17 @@
-import { ZodSchema } from "zod";
+import { ZodObject } from "zod";
 
-export class BaseValidator {
-  static validate<T>(schema: ZodSchema<T>, data: unknown): T {
-    return schema.parse(data);
+export abstract class BaseValidator {
+  protected abstract schema: ZodObject<any>;
+
+  validate(data: unknown) {
+    return this.schema.parse(data);
+  }
+
+  public safeValidate(data: unknown) {
+    return this.schema.safeParse(data);
+  }
+
+  public getSchema() {
+    return this.schema;
   }
 }
