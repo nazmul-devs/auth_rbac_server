@@ -4,7 +4,7 @@ import { Prisma } from "../../generated/prisma";
 import { logger } from "../utils/logger";
 import { AppError } from "./AppError";
 
-interface ErrorResponse {
+export interface ErrorResponse {
   success: boolean;
   message: string;
   code?: string;

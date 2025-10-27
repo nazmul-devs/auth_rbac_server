@@ -12,7 +12,7 @@ export class UserValidator extends BaseValidator {
   });
 
   // ✅ Additional use-cases (optional)
-  public loginSchema = z.object({
+  static loginSchema = z.object({
     body: z.object({
       email: z.string().email(),
       password: z.string(),

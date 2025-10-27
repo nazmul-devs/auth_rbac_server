@@ -1,13 +1,20 @@
 import { Request, Response } from "express";
 import { BaseRoute } from "../../base/BaseRoute";
+import { validateRequest } from "../middlewares/validate-request";
+import { AuthController } from "./auth.controller";
+import { AuthValidator } from "./auth.validator";
 
 /**
  * @swagger
  * tags:
- *   name: Users
+ *   name: Auth
  *   description: User management API
  */
-export class UserRoute extends BaseRoute {
+export class AuthRoutes extends BaseRoute<AuthController> {
+  constructor() {
+    super(new AuthController());
+  }
+
   protected initializeRoutes(): void {
     /**
      * @swagger
@@ -19,7 +26,11 @@ export class UserRoute extends BaseRoute {
      *       200:
      *         description: Returns a list of all users
      */
-    this.router.get("/users", this.getAllUsers);
+    this.router.post(
+      "/signup",
+      validateRequest(AuthValidator.signup),
+      this.controller.register
+    );
 
     /**
      * @swagger
@@ -42,14 +53,14 @@ export class UserRoute extends BaseRoute {
      *       201:
      *         description: User created successfully
      */
-    this.router.post("/users", this.createUser);
-  }
-
-  private getAllUsers(req: Request, res: Response) {
-    res.json([{ id: 1, name: "Nazmul Hosen" }]);
-  }
-
-  private createUser(req: Request, res: Response) {
-    res.status(201).json({ message: "User created" });
+    this.router.post(
+      "/signin",
+      validateRequest(AuthValidator.login),
+      createUser
+    );
   }
 }
+
+const createUser = (_req: Request, res: Response) => {
+  res.status(201).json({ message: "User created" });
+};

@@ -10,7 +10,7 @@ export type AsyncRequestHandler = (
 ) => Promise<void>;
 
 export class BaseController {
-  static asyncHandler(fn: AsyncRequestHandler): AsyncRequestHandler {
+  asyncHandler(fn: AsyncRequestHandler): AsyncRequestHandler {
     return (req, res, next) => {
       return Promise.resolve(fn(req, res, next)).catch((error) => {
         // If it's already an AppError, pass it through
