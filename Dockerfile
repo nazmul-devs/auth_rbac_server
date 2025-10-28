@@ -1,34 +1,31 @@
-# Stage 1: Build
-FROM node:20-alpine AS builder
+# ---------- Builder ----------
+FROM node:18-alpine AS builder
 WORKDIR /app
 
-# Copy package files and install dependencies
 COPY package*.json ./
-RUN npm ci
+RUN npm install
 
-# Copy source code
-COPY . .
+COPY tsconfig*.json ./
+COPY src ./src
+COPY prisma ./prisma
+COPY .env.production ./.env
 
-# Build TypeScript to /dist
+
+# Generate Prisma client (safe, doesn’t need DB)
+RUN npm run pg
 RUN npm run build
 
-# Stage 2: Production
-FROM node:20-alpine AS runner
+
+# ---------- Runtime ----------
+FROM node:18-alpine AS app
 WORKDIR /app
-ENV NODE_ENV=production
 
-# Copy package.json and dist folder
-COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/dist ./dist
-
-# Install only production dependencies
-RUN npm ci --production
-
-# Copy wait-for script
-COPY wait-for.sh /wait-for.sh
-RUN chmod +x /wait-for.sh
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package*.json ./
+COPY --from=builder /app/prisma ./prisma
 
 EXPOSE 4001
 
-# Run wait-for script to wait for Postgres & Redis before starting app
-CMD ["/wait-for.sh", "postgres:5432", "redis:6379", "--", "node", "dist/server.js"]
+# Run migrations after env is loaded, then start server
+CMD npx prisma migrate deploy && npm run start

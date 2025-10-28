@@ -3,6 +3,9 @@ import express, { Application, NextFunction, Request, Response } from "express";
 import rateLimit from "express-rate-limit";
 import helmet from "helmet";
 import morgan from "morgan";
+import swaggerUi from "swagger-ui-express";
+import { AuthRoutes } from "./api/auth/auth.routes";
+import swaggerSpec from "./api/docs/swagger";
 import { corsMiddleware } from "./core/config/cors.config";
 import { AppError } from "./core/errors/AppError";
 import { errorHandler } from "./core/errors/errorHandler";
@@ -35,6 +38,9 @@ const limiter = rateLimit({
 });
 app.use("/api", limiter);
 
+// Swagger route
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
 /* Health Check -------------------- */
 app.get("/health", (_req: Request, res: Response) => {
   res.status(200).json({
@@ -45,8 +51,7 @@ app.get("/health", (_req: Request, res: Response) => {
 });
 
 /* API Routes -------------------- */
-// app.use('/api/v1/auth', authRoutes);
-// app.use('/api/v1/users', userRoutes);
+app.use("/api/v1/auth", new AuthRoutes().router);
 
 /* Swagger Docs (optional) -------------------- */
 if (process.env.NODE_ENV !== "production") {

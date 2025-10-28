@@ -1,7 +1,7 @@
 import http from "http";
 import app from "./app";
 import { config } from "./core/config/env";
-import { prisma } from "./core/database/prisma";
+import { prisma } from "./prisma/client";
 import { logger } from "./core/utils/logger";
 
 const PORT = config.port;
