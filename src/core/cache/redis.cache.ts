@@ -1,5 +1,5 @@
 import Redis from "ioredis";
-import { config } from "../../config/env.config";
+import { config } from "../config/env.config";
 import { throwValidation } from "../errors/errors";
 import { logger } from "../utils/logger";
 

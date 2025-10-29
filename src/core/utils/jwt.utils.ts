@@ -1,5 +1,5 @@
 import jwt, { SignOptions } from "jsonwebtoken";
-import { config } from "../../config/env.config";
+import { config } from "../config/env.config";
 
 class JwtUtils {
   private readonly jwtSecret: string;

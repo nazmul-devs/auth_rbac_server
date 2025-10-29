@@ -1,8 +1,8 @@
 import http from "http";
 import app from "./app";
-import { config } from "./config/env";
-import { prisma } from "./prisma/client";
+import { config } from "./core/config/env.config";
 import { logger } from "./core/utils/logger";
+import { prisma } from "./prisma/client";
 
 const PORT = config.port;
 const server = http.createServer(app);

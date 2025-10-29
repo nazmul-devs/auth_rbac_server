@@ -1,6 +1,6 @@
 // src/core/utils/bcrypt.util.ts
 import bcrypt from "bcrypt";
-import { config } from "../../config/env.config";
+import { config } from "../config/env.config";
 
 export class BcryptUtil {
   /**

@@ -2,9 +2,9 @@ import fs from "fs";
 import handlebars from "handlebars";
 import nodemailer from "nodemailer";
 import path from "path";
-import { config } from "../config/env.config";
-import { logger } from "../core/utils/logger";
 import slackService from "./slack.service";
+import { config } from "../config/env.config";
+import { logger } from "../utils/logger";
 
 class EmailService {
   private transporter: nodemailer.Transporter;

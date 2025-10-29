@@ -25,7 +25,7 @@ export const authMiddleware = (
       });
     }
 
-    const decoded = jwt.verifyAccessToken(token);
+    const decoded = jwt.verifyToken(token);
     req.user = decoded;
 
     next();

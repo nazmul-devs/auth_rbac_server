@@ -1,5 +1,3 @@
-import { config } from "../config/env.config";
-
 /** webhook url creation
  *
  * 1.visit: https://api.slack.com/apps
@@ -11,6 +9,8 @@ import { config } from "../config/env.config";
  * 7.copy: https://hooks.slack.com/services/T.../B.../XXX
  *
  */
+
+import { config } from "../config/env.config";
 
 class SlackService {
   async sendMessage(message: string) {
