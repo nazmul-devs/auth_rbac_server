@@ -22,34 +22,56 @@ interface ErrorResponse {
   meta?: MetaInfo;
 }
 
+export type ServiceReturnDto = {
+  statusCode?: number;
+  message: string;
+  data?: any;
+  meta?: MetaInfo;
+};
+
 export class ResponseHandler {
+  /**
+   * ✅ Send success response
+   */
   static success<T>(
     res: Response,
-    statusCode: number,
-    message: string,
-    data?: T,
-    meta?: MetaInfo
+    {
+      statusCode = 200,
+      message,
+      data,
+      meta,
+    }: {
+      statusCode?: number;
+      message: string;
+      data?: T;
+      meta?: MetaInfo;
+    }
   ): Response {
-    return res.status(statusCode).json({
+    const response: SuccessResponse<T> = {
       success: true,
       statusCode,
       message,
-      data: data || undefined,
+      data,
       meta: {
         ...meta,
         timestamp: new Date().toISOString(),
       },
-    } satisfies SuccessResponse<T>);
+    };
+
+    return res.status(statusCode).json(response);
   }
 
+  /**
+   * ❌ Standardized error response (production ready)
+   */
   static error(
     res: Response,
     statusCode: number,
     message: string,
-    errors?: { field?: string; message: string }[],
+    errors?: any,
     meta?: MetaInfo
   ): Response {
-    return res.status(statusCode).json({
+    const response: ErrorResponse = {
       success: false,
       statusCode,
       message,
@@ -58,7 +80,9 @@ export class ResponseHandler {
         ...meta,
         timestamp: new Date().toISOString(),
       },
-    } satisfies ErrorResponse);
+    };
+
+    return res.status(statusCode).json(response);
   }
 
   static serverError(res: Response, error: any): Response {

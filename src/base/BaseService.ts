@@ -1,17 +1,29 @@
+import redisCache from "../core/cache/redis.cache";
+import { throwUnauthorized, throwValidation } from "../core/errors/errors";
 import { prisma } from "../prisma/client";
 
 export class BaseService {
   protected db = prisma;
-  protected cache: any = null; // Will be implemented when cache is added
+  protected cache = redisCache;
 
-  constructor() {
-    // Initialize any common service dependencies here
-  }
+  constructor() {}
 
   // Method to set cache if needed
-  setCache(cacheInstance: any) {
-    this.cache = cacheInstance;
+  setCache(key: string, value: any) {
+    this.cache.set(key, value);
   }
+
+  getCache(key: string) {
+    this.cache.get(key);
+  }
+
+  delCache(key: string) {
+    this.cache.del(key);
+  }
+
+  // Throw Errors
+  throwError = throwValidation;
+  throwUnauthorized = throwUnauthorized;
 
   // Common methods that all services might need can be added here
   async findById<T>(model: keyof typeof prisma, id: string): Promise<T | null> {

@@ -17,9 +17,9 @@ class JwtUtils {
   /**
    * Sign Access Token
    */
-  public generateToken(payload: object): string {
+  public generateToken(payload: object, expiresIn?: any): string {
     const options: SignOptions = {
-      expiresIn: this.jwtExpiresIn,
+      expiresIn: expiresIn || this.jwtExpiresIn,
       algorithm: "HS256",
     };
 

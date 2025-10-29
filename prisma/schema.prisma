@@ -12,17 +12,21 @@ datasource db {
 // Models
 // ======================
 model User {
-  id            String         @id @default(uuid())
-  name          String?
-  mobile        String?
-  email         String         @unique
-  username      String         @unique
-  passwordHash  String
-  isActive      Boolean        @default(true)
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  roles         UserRole[]
-  refreshTokens RefreshToken[]
+  id                   String         @id @default(uuid())
+  name                 String?
+  mobile               String?
+  email                String         @unique
+  username             String         @unique
+  password_hash        String
+  verification_token   String?
+  verification_expires DateTime?
+  two_fa_enabled       Boolean        @default(false)
+  is_verified          Boolean        @default(false)
+  is_active            Boolean        @default(true)
+  created_at           DateTime       @default(now())
+  updated_at           DateTime       @updatedAt
+  roles                UserRole[]
+  refresh_tokens       RefreshToken[]
 }
 
 model Role {
@@ -41,28 +45,28 @@ model Permission {
 }
 
 model UserRole {
-  id     String @id @default(uuid())
-  user   User   @relation(fields: [userId], references: [id])
-  userId String
-  role   Role   @relation(fields: [roleId], references: [id])
-  roleId String
+  id      String @id @default(uuid())
+  user    User   @relation(fields: [user_id], references: [id])
+  user_id String
+  role    Role   @relation(fields: [role_id], references: [id])
+  role_id String
 }
 
 model RolePermission {
-  id           String     @id @default(uuid())
-  role         Role       @relation(fields: [roleId], references: [id])
-  roleId       String
-  permission   Permission @relation(fields: [permissionId], references: [id])
-  permissionId String
+  id            String     @id @default(uuid())
+  role          Role       @relation(fields: [role_id], references: [id])
+  role_id       String
+  permission    Permission @relation(fields: [permission_id], references: [id])
+  permission_id String
 }
 
 model RefreshToken {
-  id           String   @id @default(uuid())
-  tokenHash    String
-  user         User     @relation(fields: [userId], references: [id])
-  userId       String
-  revoked      Boolean  @default(false)
-  createdAt    DateTime @default(now())
-  replacedById String? // for rotation
-  expiresAt    DateTime
+  id             String   @id @default(uuid())
+  token_hash     String
+  user           User     @relation(fields: [user_id], references: [id])
+  user_id        String
+  revoked        Boolean  @default(false)
+  created_at     DateTime @default(now())
+  replaced_by_id String?
+  expires_at     DateTime
 }

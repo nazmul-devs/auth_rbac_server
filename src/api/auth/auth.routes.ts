@@ -29,7 +29,7 @@ export class AuthRoutes extends BaseRoute<AuthController> {
     this.router.post(
       "/signup",
       validateRequest(AuthValidator.signup),
-      this.controller.register
+      this.controller.signup
     );
 
     /**

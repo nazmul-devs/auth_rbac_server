@@ -2,11 +2,11 @@ import fs from "fs";
 import handlebars from "handlebars";
 import nodemailer from "nodemailer";
 import path from "path";
-import slackService from "./slack.service";
 import { config } from "../config/env.config";
+import slackService from "../services/slack.service";
 import { logger } from "../utils/logger";
 
-class EmailService {
+class Mailer {
   private transporter: nodemailer.Transporter;
 
   constructor() {
@@ -32,10 +32,17 @@ class EmailService {
 
   async sendEmail(
     to: string,
-    subject: string,
-    templateName: string,
-    templateData: any,
-    attachments?: { filename: string; path: string }[]
+    {
+      subject,
+      templateName,
+      templateData,
+      attachments,
+    }: {
+      subject: string;
+      templateName: string;
+      templateData: any;
+      attachments?: { filename: string; path: string }[];
+    }
   ): Promise<void> {
     try {
       const html = await this.compileTemplate(templateName, templateData);
@@ -62,4 +69,4 @@ class EmailService {
   }
 }
 
-export const emailService = new EmailService();
+export default new Mailer();
