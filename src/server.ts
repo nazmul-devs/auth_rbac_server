@@ -1,6 +1,6 @@
 import http from "http";
 import app from "./app";
-import { config } from "./core/config/env";
+import { config } from "./config/env";
 import { prisma } from "./prisma/client";
 import { logger } from "./core/utils/logger";
 

@@ -6,7 +6,7 @@ import morgan from "morgan";
 import swaggerUi from "swagger-ui-express";
 import { AuthRoutes } from "./api/auth/auth.routes";
 import swaggerSpec from "./api/docs/swagger";
-import { corsMiddleware } from "./core/config/cors.config";
+import { corsMiddleware } from "./config/cors.config";
 import { AppError } from "./core/errors/AppError";
 import { errorHandler } from "./core/errors/errorHandler";
 import { logger } from "./core/utils/logger";

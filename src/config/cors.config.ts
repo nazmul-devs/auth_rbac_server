@@ -1,5 +1,5 @@
 import cors, { CorsOptions } from "cors";
-import { config } from "./env";
+import { config } from "./env.config";
 
 const isProduction = config.nodeEnv === "production";
 
