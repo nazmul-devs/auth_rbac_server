@@ -2,20 +2,24 @@
 
 const refreshService = new RefreshTokenService();
 
-### //---- On login
+\*\* On login
 
 ```
 const { token: refreshToken, expiresAt } = await refreshService.createRefreshToken(user.id);
 const accessToken = refreshService.generateAccessToken(user.id);
 ```
 
-### //---- On refresh
+\*\* On refresh
 
-`const { accessToken: newAccessToken, refreshToken: newRefreshToken } = await refreshService.rotateRefreshToken(oldRefreshToken);`
+```
+const { accessToken: newAccessToken, refreshToken: newRefreshToken } = await refreshService.rotateRefreshToken(oldRefreshToken);
+```
 
-### //---- On logout
+\*\* On logout
 
+```
 await refreshService.revokeToken(refreshToken);
+```
 
 ## === For Client Side ===
 
