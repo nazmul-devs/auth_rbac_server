@@ -111,3 +111,23 @@ await refreshService.revokeToken(refreshToken);
 
 
 */
+
+/* === For Client Side ===
+async function login(email: string, password: string) {
+  const res = await fetch("/api/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password }),
+  });
+  const data = await res.json();
+
+  /---- Save tokens
+  localStorage.setItem("accessToken", data.accessToken);
+  localStorage.setItem("refreshToken", data.refreshToken);
+}
+
+
+
+
+
+*/

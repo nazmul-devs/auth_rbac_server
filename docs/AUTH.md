@@ -1,19 +1,25 @@
-=== Refresh Token ===
+## === Refresh Token ===
+
 const refreshService = new RefreshTokenService();
 
-//---- On login
+### //---- On login
+
+```
 const { token: refreshToken, expiresAt } = await refreshService.createRefreshToken(user.id);
 const accessToken = refreshService.generateAccessToken(user.id);
+```
 
-//---- On refresh
-const { accessToken: newAccessToken, refreshToken: newRefreshToken } = await refreshService.rotateRefreshToken(oldRefreshToken);
+### //---- On refresh
 
-//---- On logout
+`const { accessToken: newAccessToken, refreshToken: newRefreshToken } = await refreshService.rotateRefreshToken(oldRefreshToken);`
+
+### //---- On logout
+
 await refreshService.revokeToken(refreshToken);
 
-=== For Client Side ===
+## === For Client Side ===
 
-1. Token Storage
+### 1. Token Storage
 
 Access Token:
 
@@ -31,24 +37,26 @@ If stored in localStorage, you risk XSS attacks.
 
 Safer approach: HttpOnly cookie, but for localStorage: encrypt if possible.
 
-2. Login Flow (Client Side)
-   async function login(email: string, password: string) {
-   const res = await fetch("/api/login", {
-   method: "POST",
-   headers: { "Content-Type": "application/json" },
-   body: JSON.stringify({ email, password }),
-   });
-   const data = await res.json();
+### 2. Login Flow (Client Side)
+
+async function login(email: string, password: string) {
+const res = await fetch("/api/login", {
+method: "POST",
+headers: { "Content-Type": "application/json" },
+body: JSON.stringify({ email, password }),
+});
+const data = await res.json();
 
 // Save tokens
 localStorage.setItem("accessToken", data.accessToken);
 localStorage.setItem("refreshToken", data.refreshToken);
 }
 
-3. API Request with Auto Refresh
-   async function fetchWithAuth(url: string, options: RequestInit = {}) {
-   let accessToken = localStorage.getItem("accessToken");
-   const refreshToken = localStorage.getItem("refreshToken");
+### 3. API Request with Auto Refresh
+
+async function fetchWithAuth(url: string, options: RequestInit = {}) {
+let accessToken = localStorage.getItem("accessToken");
+const refreshToken = localStorage.getItem("refreshToken");
 
 if (!accessToken) {
 throw new Error("No access token available");
@@ -93,21 +101,22 @@ if (!res.ok) throw new Error("Refresh token invalid or expired");
 return res.json(); // { accessToken, refreshToken }
 }
 
-4. Logout Flow
-   async function logout() {
-   const refreshToken = localStorage.getItem("refreshToken");
-   await fetch("/api/logout", {
-   method: "POST",
-   headers: { "Content-Type": "application/json" },
-   body: JSON.stringify({ refreshToken }),
-   });
+### 4. Logout Flow
+
+async function logout() {
+const refreshToken = localStorage.getItem("refreshToken");
+await fetch("/api/logout", {
+method: "POST",
+headers: { "Content-Type": "application/json" },
+body: JSON.stringify({ refreshToken }),
+});
 
 // Clear local storage
 localStorage.removeItem("accessToken");
 localStorage.removeItem("refreshToken");
 }
 
-5. Best Practices
+### 5. Best Practices
 
 Access Token: fine in memory or localStorage.
 
