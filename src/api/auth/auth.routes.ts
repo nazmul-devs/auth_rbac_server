@@ -55,12 +55,8 @@ export class AuthRoutes extends BaseRoute<AuthController> {
      */
     this.router.post(
       "/signin",
-      validateRequest(AuthValidator.login),
-      createUser
+      validateRequest(AuthValidator.signin),
+      this.controller.signin
     );
   }
 }
-
-const createUser = (_req: Request, res: Response) => {
-  res.status(201).json({ message: "User created" });
-};

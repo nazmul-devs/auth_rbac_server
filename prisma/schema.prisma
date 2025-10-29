@@ -62,10 +62,12 @@ model RolePermission {
 
 model RefreshToken {
   id             String   @id @default(uuid())
-  token_hash     String
+  token_hash     String   @unique
   user_id        String
   revoked        Boolean  @default(false)
   created_at     DateTime @default(now())
+  device_id      String? // unique per device
+  device_name    String? // optional, e.g., "Chrome Desktop"
   replaced_by_id String?
   expires_at     DateTime
   user           User     @relation(fields: [user_id], references: [id])

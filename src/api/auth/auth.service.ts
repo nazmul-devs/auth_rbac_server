@@ -7,7 +7,6 @@ import { BcryptUtil } from "../../core/utils/bcrypt.utils";
 import jwtUtils from "../../core/utils/jwt.utils";
 import { ServiceReturnDto } from "../../core/utils/responseHandler";
 import { SigninDto, SignupDto, VerifyEmailDto } from "./auth.validator";
-import { connect } from "http2";
 
 type SignupFnDto = (payload: SignupDto["body"]) => Promise<ServiceReturnDto>;
 type SigninFnDto = (payload: SigninDto["body"]) => Promise<ServiceReturnDto>;
@@ -164,6 +163,25 @@ export class AuthService extends BaseService {
       username: user.username,
     });
 
+    const activeDevices = await this.db.refreshToken.findMany({
+      where: {
+        user_id: user.id,
+        revoked: false,
+        expires_at: { gt: new Date() },
+      },
+    });
+
+    if (activeDevices.length >= 3) {
+      // revoke oldest token
+      const oldest = activeDevices.sort(
+        (a, b) => a.created_at.getTime() - b.created_at.getTime()
+      )[0];
+      await this.db.refreshToken.update({
+        where: { id: oldest.id },
+        data: { revoked: true },
+      });
+    }
+
     // ---- trust device
     let trustedDeviceToken: string | null = null;
 
@@ -192,11 +210,16 @@ export class AuthService extends BaseService {
 });
  */
 
+    const hashedToken = crypto
+      .createHash("sha256")
+      .update(refreshToken)
+      .digest("hex");
+
     // ---- save refresh token
     await this.db.refreshToken.create({
       data: {
         user_id: user.id,
-        token_hash: refreshToken,
+        token_hash: hashedToken,
         expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // +7 days
       },
     });
@@ -218,10 +241,18 @@ export class AuthService extends BaseService {
   };
 
   refresh = async () => {
-    const refreshToken = "xyz";
+    // Token sent by client
+    const receivedToken = "req.body.refreshToken";
 
+    // Hash it
+    const hashedToken = crypto
+      .createHash("sha256")
+      .update(receivedToken)
+      .digest("hex");
+
+    // Query DB
     const tokenRecord = await this.db.refreshToken.findFirst({
-      where: { token_hash: refreshToken },
+      where: { token_hash: hashedToken },
     });
 
     if (
@@ -233,6 +264,25 @@ export class AuthService extends BaseService {
     }
 
     // generate new access token (and optionally new refresh token)
+  };
+
+  // currently login device
+  currentlyLoginDevice = async (user: any) => {
+    const devices = await this.db.refreshToken.findMany({
+      where: {
+        user_id: user.id,
+        revoked: false,
+        expires_at: { gt: new Date() },
+      },
+      select: {
+        // device_id: true,
+        // device_name: true,
+        created_at: true,
+        expires_at: true,
+      },
+    });
+
+    return devices;
   };
 
   // ✅ Verify if a device token is still trusted

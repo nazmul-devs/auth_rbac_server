@@ -18,4 +18,12 @@ export class AuthController extends BaseController {
 
     this.sendResponse(res, data);
   });
+
+  signin = this.asyncHandler(async (req: Request, res: Response) => {
+    const { body } = req.validatedData;
+
+    const data = await this.service.signin(body);
+
+    this.sendResponse(res, data);
+  });
 }
