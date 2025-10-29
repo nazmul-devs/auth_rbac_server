@@ -1,63 +1,62 @@
-## === Refresh Token ===
+## _Refresh Token_
 
-const refreshService = new RefreshTokenService();
+```
+const refreshService = new
+```
 
-\*\* On login
+**_On Login_**
 
 ```
 const { token: refreshToken, expiresAt } = await refreshService.createRefreshToken(user.id);
 const accessToken = refreshService.generateAccessToken(user.id);
 ```
 
-\*\* On refresh
+**_On refresh_**
 
 ```
 const { accessToken: newAccessToken, refreshToken: newRefreshToken } = await refreshService.rotateRefreshToken(oldRefreshToken);
 ```
 
-\*\* On logout
+**_On logout_**
 
 ```
 await refreshService.revokeToken(refreshToken);
 ```
 
-## === For Client Side ===
+## **_For Client Side_**
 
-### 1. Token Storage
+**_1. Token Storage_**
 
-Access Token:
+> **Access Token:**
+> Short-lived (15–30 min).
+> Store in memory or localStorage.
+> Used to authorize API requests in Authorization: Bearer <token> header.
+> **Refresh Token:**
+> Long-lived (7–30 days).
+> If stored in localStorage, you risk XSS attacks.
+> Safer approach: HttpOnly cookie, but for localStorage: encrypt if possible.
 
-Short-lived (15–30 min).
+**_2. Login Flow (Client Side)_**
 
-Store in memory or localStorage.
-
-Used to authorize API requests in Authorization: Bearer <token> header.
-
-Refresh Token:
-
-Long-lived (7–30 days).
-
-If stored in localStorage, you risk XSS attacks.
-
-Safer approach: HttpOnly cookie, but for localStorage: encrypt if possible.
-
-### 2. Login Flow (Client Side)
-
+```
 async function login(email: string, password: string) {
 const res = await fetch("/api/login", {
 method: "POST",
 headers: { "Content-Type": "application/json" },
 body: JSON.stringify({ email, password }),
 });
+
 const data = await res.json();
 
 // Save tokens
 localStorage.setItem("accessToken", data.accessToken);
 localStorage.setItem("refreshToken", data.refreshToken);
 }
+```
 
-### 3. API Request with Auto Refresh
+**_3. API Request with Auto Refresh_**
 
+```
 async function fetchWithAuth(url: string, options: RequestInit = {}) {
 let accessToken = localStorage.getItem("accessToken");
 const refreshToken = localStorage.getItem("refreshToken");
@@ -104,9 +103,11 @@ body: JSON.stringify({ refreshToken }),
 if (!res.ok) throw new Error("Refresh token invalid or expired");
 return res.json(); // { accessToken, refreshToken }
 }
+```
 
-### 4. Logout Flow
+**_4. Logout Flow_**
 
+```
 async function logout() {
 const refreshToken = localStorage.getItem("refreshToken");
 await fetch("/api/logout", {
@@ -119,15 +120,12 @@ body: JSON.stringify({ refreshToken }),
 localStorage.removeItem("accessToken");
 localStorage.removeItem("refreshToken");
 }
+```
 
-### 5. Best Practices
+**_5. Best Practices_**
 
-Access Token: fine in memory or localStorage.
-
-Refresh Token: localStorage is vulnerable to XSS → better use HttpOnly cookie.
-
-Token Expiry: always check expiry before sending requests.
-
-Rotation: if using refresh tokens, rotate them after every refresh.
-
-Logout: revoke refresh token in backend and remove tokens from client.
+- Access Token: fine in memory or localStorage.
+- Refresh Token: localStorage is vulnerable to XSS → better use HttpOnly cookie.
+- Token Expiry: always check expiry before sending requests.
+- Rotation: if using refresh tokens, rotate them after every refresh.
+- Logout: revoke refresh token in backend and remove tokens from client.
