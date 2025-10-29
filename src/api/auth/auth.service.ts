@@ -7,6 +7,7 @@ import { BcryptUtil } from "../../core/utils/bcrypt.utils";
 import jwtUtils from "../../core/utils/jwt.utils";
 import { ServiceReturnDto } from "../../core/utils/responseHandler";
 import { SigninDto, SignupDto, VerifyEmailDto } from "./auth.validator";
+import { connect } from "http2";
 
 type SignupFnDto = (payload: SignupDto["body"]) => Promise<ServiceReturnDto>;
 type SigninFnDto = (payload: SigninDto["body"]) => Promise<ServiceReturnDto>;
@@ -163,6 +164,7 @@ export class AuthService extends BaseService {
       username: user.username,
     });
 
+    // ---- trust device
     let trustedDeviceToken: string | null = null;
 
     if (trustDevice) {
@@ -180,6 +182,25 @@ export class AuthService extends BaseService {
       await this.cache.set(key, "valid", { ttl: 30 * 24 * 60 * 60 });
     }
 
+    // * revoked is a flag to mark tokens as invalid before expiry
+    // * Always store token_hash as a hashed value to prevent misuse if your DB is compromised
+
+    /* for logout
+    await this.db.refreshToken.update({
+  where: { token_hash: refreshToken },
+  data: { revoked: true }
+});
+ */
+
+    // ---- save refresh token
+    await this.db.refreshToken.create({
+      data: {
+        user_id: user.id,
+        token_hash: refreshToken,
+        expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // +7 days
+      },
+    });
+
     return {
       message: "Signin successful.",
       data: {
@@ -194,6 +215,24 @@ export class AuthService extends BaseService {
         },
       },
     };
+  };
+
+  refresh = async () => {
+    const refreshToken = "xyz";
+
+    const tokenRecord = await this.db.refreshToken.findFirst({
+      where: { token_hash: refreshToken },
+    });
+
+    if (
+      !tokenRecord ||
+      tokenRecord.revoked ||
+      tokenRecord.expires_at < new Date()
+    ) {
+      throw new Error("Invalid or expired refresh token");
+    }
+
+    // generate new access token (and optionally new refresh token)
   };
 
   // ✅ Verify if a device token is still trusted

@@ -63,10 +63,10 @@ model RolePermission {
 model RefreshToken {
   id             String   @id @default(uuid())
   token_hash     String
-  user           User     @relation(fields: [user_id], references: [id])
   user_id        String
   revoked        Boolean  @default(false)
   created_at     DateTime @default(now())
   replaced_by_id String?
   expires_at     DateTime
+  user           User     @relation(fields: [user_id], references: [id])
 }
