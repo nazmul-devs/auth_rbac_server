@@ -6,7 +6,6 @@ export class AuthValidator extends BaseValidator {
     name: z.string().min(3),
     email: BaseValidator.email,
     password: BaseValidator.password,
-
     username: z
       .string()
       .trim()
@@ -15,7 +14,8 @@ export class AuthValidator extends BaseValidator {
       .regex(
         /^[a-zA-Z0-9_]+$/,
         "Username can only contain letters, numbers, and underscores."
-      ),
+      )
+      .optional(),
   });
 
   private static signinSchema = z.object({
@@ -25,6 +25,7 @@ export class AuthValidator extends BaseValidator {
   });
 
   static signup = z.object({ body: this.signupSchema });
+
   static signin = z.object({ body: this.signinSchema });
   static verifyEmail = z.object({
     body: z.object({

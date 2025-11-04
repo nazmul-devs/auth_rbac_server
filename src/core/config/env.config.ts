@@ -6,6 +6,7 @@ export const config = {
   nodeEnv: process.env.NODE_ENV || "development",
   slackWebhook: process.env.SLACK_WEBHOOK_URL,
   SALT_ROUNDS: parseInt(process.env.BCRYPT_SALT_ROUNDS || "10"),
+  CLIENT_URL: process.env.CLIENT_URL,
   jwt: {
     jwtSecret: process.env.JWT_SECRET || "access_secret",
     jwtExpiresIn: process.env.JWT_EXPIRES_IN || "15m",

@@ -9,11 +9,11 @@ const prisma = new PrismaClient({
   ],
 });
 
-prisma.$on("query", (e) => {
-  if (process.env.NODE_ENV === "development") {
-    logger.info(`Query: ${e.query}`);
-  }
-});
+// prisma.$on("query", (e) => {
+//   if (process.env.NODE_ENV === "development") {
+//     logger.info(`Query: ${e.query}`);
+//   }
+// });
 
 prisma.$on("error", (e) => logger.error(e));
 prisma.$on("warn", (e) => logger.warn(e));

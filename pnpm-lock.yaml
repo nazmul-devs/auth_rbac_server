@@ -20,6 +20,9 @@ importers:
       cors:
         specifier: ^2.8.5
         version: 2.8.5
+      cuid:
+        specifier: ^3.0.0
+        version: 3.0.0
       dotenv:
         specifier: ^17.2.3
         version: 17.2.3
@@ -739,6 +742,10 @@ packages:
 
   create-require@1.1.1:
     resolution: {integrity: sha512-dcKFX3jn0MpIaXjisoRvexIJVEKzaq7z2rZKxf+MSr9TkdmHmsU4m2lcLojrj/FHl8mk5VxMmYA+ftRkP/3oKQ==}
+
+  cuid@3.0.0:
+    resolution: {integrity: sha512-WZYYkHdIDnaxdeP8Misq3Lah5vFjJwGuItJuV+tvMafosMzw0nF297T7mrm8IOWiPJkV6gc7sa8pzx27+w25Zg==}
+    deprecated: Cuid and other k-sortable and non-cryptographic ids (Ulid, ObjectId, KSUID, all UUIDs) are all insecure. Use @paralleldrive/cuid2 instead.
 
   debug@2.6.9:
     resolution: {integrity: sha512-bC7ElrdJaJnPbAP+1EotYvqZsb3ecl5wi6Bfi6BJTUcNowp6cvspg0jXznRTKDjm/E7AdgFBVeAPVMNcKGsHMA==}
@@ -2565,6 +2572,8 @@ snapshots:
       vary: 1.1.2
 
   create-require@1.1.1: {}
+
+  cuid@3.0.0: {}
 
   debug@2.6.9:
     dependencies:

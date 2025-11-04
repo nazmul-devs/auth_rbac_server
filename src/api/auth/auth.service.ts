@@ -2,10 +2,11 @@ import crypto from "crypto";
 import { BaseService } from "../../base/BaseService";
 import { config } from "../../core/config/env.config";
 import { throwValidation } from "../../core/errors/errors";
-import mailer from "../../core/mail/mailer";
+import { eventBus } from "../../core/events/event-bul.service";
 import { BcryptUtil } from "../../core/utils/bcrypt.utils";
 import jwtUtils from "../../core/utils/jwt.utils";
 import { ServiceReturnDto } from "../../core/utils/responseHandler";
+import { AuthUtils } from "./auth.utils";
 import { SigninDto, SignupDto, VerifyEmailDto } from "./auth.validator";
 
 type SignupFnDto = (payload: SignupDto["body"]) => Promise<ServiceReturnDto>;
@@ -45,7 +46,7 @@ export class AuthService extends BaseService {
       data: {
         name,
         email,
-        username,
+        username: username || AuthUtils.generateUsername(name),
         password_hash: passwordHash,
         verification_token: verificationToken,
         verification_expires: verificationExpires,
@@ -53,22 +54,20 @@ export class AuthService extends BaseService {
     });
 
     // Prepare verification link
-    const verificationLink = `${config}/verify-email?token=${verificationToken}`;
+    const verificationLink = `${config.CLIENT_URL}/verify-email?token=${verificationToken}`;
 
     //  Send email
-    await mailer.sendEmail(email, {
-      subject: "Verify your email address",
-      templateName: "verify-email",
-      templateData: {
-        name: user.name,
-        verificationLink,
-      },
+    eventBus.publish("email_verification:signup", {
+      email,
+      name: user.name,
+      verificationLink,
     });
 
     return {
       statusCode: 201,
       message:
         "Registration successful. Please check your email for verification link.",
+      data: { verificationLink },
     };
   };
 

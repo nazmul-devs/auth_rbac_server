@@ -13,8 +13,8 @@ export class ForbiddenError extends AppError {
 }
 
 export class ValidationError extends AppError {
-  constructor(message = "Validation failed") {
-    super(message, 422, "VALIDATION_ERROR");
+  constructor(message: string, details?: any) {
+    super(message, 422, details, "VALIDATION_ERROR");
   }
 }
 

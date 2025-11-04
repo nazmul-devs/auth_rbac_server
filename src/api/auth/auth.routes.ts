@@ -1,4 +1,3 @@
-import { Request, Response } from "express";
 import { BaseRoute } from "../../base/BaseRoute";
 import { validateRequest } from "../middlewares/validate-request";
 import { AuthController } from "./auth.controller";
@@ -30,6 +29,22 @@ export class AuthRoutes extends BaseRoute<AuthController> {
       "/signup",
       validateRequest(AuthValidator.signup),
       this.controller.signup
+    );
+
+    /**
+     * @swagger
+     * /users:
+     *   get:
+     *     summary: Get all users
+     *     tags: [Users]
+     *     responses:
+     *       200:
+     *         description: Returns a list of all users
+     */
+    this.router.post(
+      "/verification",
+      validateRequest(AuthValidator.verifyEmail),
+      this.controller.verifyEmail
     );
 
     /**

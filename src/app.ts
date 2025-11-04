@@ -9,9 +9,14 @@ import swaggerSpec from "./api/docs/swagger";
 import { corsMiddleware } from "./core/config/cors.config";
 import { AppError } from "./core/errors/AppError";
 import { errorHandler } from "./core/errors/errorHandler";
+import { emailEvents } from "./core/events/email.events";
+import { eventBus } from "./core/events/event-bul.service";
 import { logger } from "./core/utils/logger";
 
 const app: Application = express();
+
+// Register event handlers
+emailEvents(eventBus);
 
 /* Security Middlewares -------------------- */
 app.use(helmet());

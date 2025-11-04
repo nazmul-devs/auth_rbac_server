@@ -9,6 +9,7 @@ export interface ErrorResponse {
   message: string;
   code?: string;
   details?: any;
+  timestamp?: string;
 }
 
 export function errorHandler(
@@ -72,12 +73,7 @@ export function errorHandler(
   // Unexpected / programming errors
   else {
     logger.error(`[UNEXPECTED] ${err.stack || err}`);
-    customError = new AppError(
-      "Internal server error",
-      500,
-      "INTERNAL_ERROR",
-      false
-    );
+    customError = new AppError("Internal server error", 500, "INTERNAL_ERROR");
   }
 
   // Logging (only non-validation / internal)
@@ -87,15 +83,19 @@ export function errorHandler(
 
   const response: ErrorResponse = {
     success: false,
-    message: customError.message,
-    code: customError.code,
+    message: err.message || "Internal server error",
+    code: err.code || "INTERNAL_ERROR",
+    details: err.details || null,
+    timestamp: new Date().toISOString(),
   };
 
   if (
     process.env.NODE_ENV !== "production" &&
     customError.isOperational === false
   ) {
-    response.details = err.stack;
+    const stack = err.stack.split(`src`);
+
+    response.details = "src" + stack[stack.length - 1];
   }
 
   res.status(customError.statusCode).json(response);

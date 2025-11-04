@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
 import { BaseController } from "../../base/BaseController";
-import { ServiceReturnDto } from "../../core/utils/responseHandler";
 import { AuthService } from "./auth.service";
 
 export class AuthController extends BaseController {
@@ -15,6 +14,14 @@ export class AuthController extends BaseController {
     const { body } = req.validatedData;
 
     const data = await this.service.signup(body);
+
+    this.sendResponse(res, data);
+  });
+
+  verifyEmail = this.asyncHandler(async (req: Request, res: Response) => {
+    const { body } = req.validatedData;
+
+    const data = await this.service.verifyEmail(body);
 
     this.sendResponse(res, data);
   });
