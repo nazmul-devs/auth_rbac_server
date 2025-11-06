@@ -21,12 +21,33 @@ model User {
   verification_token   String?
   verification_expires DateTime?
   two_fa_enabled       Boolean        @default(false)
-  is_verified          Boolean        @default(false)
-  is_active            Boolean        @default(true)
+  status               UserStatus     @default(PENDING_VERIFICATION)
   created_at           DateTime       @default(now())
   updated_at           DateTime       @updatedAt
   roles                UserRole[]
   refresh_tokens       RefreshToken[]
+}
+
+enum UserStatus {
+  // Registration & Verification
+  UNVERIFIED
+  PENDING_VERIFICATION
+
+  // Active States
+  ACTIVE
+  ONLINE
+  OFFLINE
+  AWAY
+
+  // Administrative States
+  SUSPENDED
+  BANNED
+  RESTRICTED
+
+  // Inactive States
+  INACTIVE
+  DELETED
+  ARCHIVED
 }
 
 model Role {

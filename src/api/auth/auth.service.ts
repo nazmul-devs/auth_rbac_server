@@ -7,10 +7,27 @@ import { BcryptUtil } from "../../core/utils/bcrypt.utils";
 import jwtUtils from "../../core/utils/jwt.utils";
 import { ServiceReturnDto } from "../../core/utils/responseHandler";
 import { AuthUtils } from "./auth.utils";
-import { SigninDto, SignupDto, VerifyEmailDto } from "./auth.validator";
+import {
+  SigninDto,
+  SignoutDto,
+  SignupDto,
+  VerifyEmailDto,
+} from "./auth.validator";
 
 type SignupFnDto = (payload: SignupDto["body"]) => Promise<ServiceReturnDto>;
+
 type SigninFnDto = (payload: SigninDto["body"]) => Promise<ServiceReturnDto>;
+
+type SignoutFnDto = (payload: SignoutDto["body"]) => Promise<ServiceReturnDto>;
+
+type SignoutAllDevicesFnDto = (payload: {
+  userId: string;
+}) => Promise<ServiceReturnDto>;
+
+type RefreshTokenFnDto = (payload: {
+  refreshToken: string;
+}) => Promise<ServiceReturnDto>;
+
 type verifyEmailFnDto = (
   payload: VerifyEmailDto["body"]
 ) => Promise<ServiceReturnDto>;
@@ -72,39 +89,6 @@ export class AuthService extends BaseService {
   };
 
   // ---------------------------
-  // ✉️ Verify Email
-  // ---------------------------
-  verifyEmail: verifyEmailFnDto = async (payload) => {
-    const user = await this.db.user.findFirst({
-      where: { verification_token: payload.token },
-    });
-
-    if (!user) {
-      return this.throwError("Invalid verification token.");
-    }
-
-    if (user.verification_expires && user.verification_expires < new Date()) {
-      throw new Error("Verification link expired. Please register again.");
-    }
-
-    await this.db.user.update({
-      where: { id: user.id },
-      data: {
-        is_verified: true,
-        verification_token: null,
-        verification_expires: null,
-      },
-    });
-
-    return { message: "Email verified successfully. You can now sign in." };
-  };
-
-  // * Resend verify email
-  // * Forgot password
-  // * Change password
-  // * Profile update
-
-  // ---------------------------
   // 🔑 Sign In
   // ---------------------------
   signin: SigninFnDto = async (payload) => {
@@ -117,7 +101,7 @@ export class AuthService extends BaseService {
     });
 
     if (!user) return this.throwUnauthorized("Invalid credentials.");
-    if (!user.is_verified)
+    if (user.status !== "ACTIVE")
       return this.throwError("Please verify your email before signing in.");
 
     const passwordMatch = await BcryptUtil.compare(
@@ -238,6 +222,174 @@ export class AuthService extends BaseService {
       },
     };
   };
+
+  signout: SignoutFnDto = async (payload) => {
+    const { refreshToken, trustedDeviceToken } = payload;
+
+    if (!refreshToken) return this.throwUnauthorized("No token provided.");
+
+    // Hash token exactly the same way as in sign-in
+    const hashedToken = crypto
+      .createHash("sha256")
+      .update(refreshToken)
+      .digest("hex");
+
+    // Revoke refresh token
+    const tokenRecord = await this.db.refreshToken.findUnique({
+      where: { token_hash: hashedToken, revoked: false },
+    });
+
+    if (!tokenRecord) {
+      return this.throwUnauthorized("Invalid token.");
+    }
+
+    await this.db.refreshToken.update({
+      where: { token_hash: hashedToken },
+      data: { revoked: true },
+    });
+
+    // If trusted device token exists → remove from Redis
+    if (trustedDeviceToken) {
+      const decoded = jwtUtils.verifyToken(trustedDeviceToken);
+      const key = `trusted_device:${decoded.userId}:${trustedDeviceToken}`;
+      await this.cache.del(key);
+    }
+
+    return {
+      message: "Signout successful.",
+    };
+  };
+
+  signoutAllDevices: SignoutAllDevicesFnDto = async ({ userId }) => {
+    await this.db.refreshToken.updateMany({
+      where: { user_id: userId, revoked: false },
+      data: { revoked: true },
+    });
+
+    // Remove all trusted devices for the user
+    const keys = await this.cache.getAllKeys(`trusted_device:${userId}:*`);
+
+    for (const key of keys) {
+      await this.cache.del(key);
+    }
+
+    return { message: "Logged out from all devices." };
+  };
+
+  refreshToken: RefreshTokenFnDto = async (payload) => {
+    const { refreshToken } = payload;
+
+    if (!refreshToken) return this.throwUnauthorized("Refresh token missing.");
+
+    let decoded;
+    try {
+      decoded = jwtUtils.verifyRefreshToken(refreshToken);
+    } catch {
+      return this.throwUnauthorized("Invalid refresh token.");
+    }
+
+    const hashedToken = crypto
+      .createHash("sha256")
+      .update(refreshToken)
+      .digest("hex");
+
+    const storedToken = await this.db.refreshToken.findUnique({
+      where: { token_hash: hashedToken },
+    });
+
+    // If token does not exist or is revoked -> Force login
+    if (!storedToken || storedToken.revoked)
+      return this.throwUnauthorized("Session expired. Please login again.");
+
+    // Expired token -> Force login
+    if (storedToken.expires_at < new Date())
+      return this.throwUnauthorized(
+        "Refresh token expired. Please login again."
+      );
+
+    // ✅ Token is valid → Rotate it (Revoke old one & create new one)
+    await this.db.refreshToken.update({
+      where: { token_hash: hashedToken },
+      data: { revoked: true },
+    });
+
+    // Fetch user
+    const user = await this.db.user.findUnique({
+      where: { id: decoded.id },
+      select: { id: true, email: true, username: true, name: true },
+    });
+
+    if (!user) return this.throwUnauthorized("User no longer exists.");
+
+    // Create new tokens
+    const newAccessToken = jwtUtils.generateToken({
+      id: user.id,
+      email: user.email,
+      username: user.username,
+    });
+
+    const newRefreshToken = jwtUtils.generateRefreshToken({
+      id: user.id,
+      email: user.email,
+      username: user.username,
+    });
+
+    // Store hashed new refresh token
+    const newHashedToken = crypto
+      .createHash("sha256")
+      .update(newRefreshToken)
+      .digest("hex");
+
+    await this.db.refreshToken.create({
+      data: {
+        user_id: user.id,
+        token_hash: newHashedToken,
+        expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      },
+    });
+
+    return {
+      message: "Token refreshed successfully.",
+      data: {
+        token: newAccessToken,
+        refreshToken: newRefreshToken,
+        user,
+      },
+    };
+  };
+
+  // ---------------------------
+  // ✉️ Verify Email
+  // ---------------------------
+  verifyEmail: verifyEmailFnDto = async (payload) => {
+    const user = await this.db.user.findFirst({
+      where: { verification_token: payload.token },
+    });
+
+    if (!user) {
+      return this.throwError("Invalid verification token.");
+    }
+
+    if (user.verification_expires && user.verification_expires < new Date()) {
+      throw new Error("Verification link expired. Please register again.");
+    }
+
+    await this.db.user.update({
+      where: { id: user.id },
+      data: {
+        status: "ACTIVE",
+        verification_token: null,
+        verification_expires: null,
+      },
+    });
+
+    return { message: "Email verified successfully. You can now sign in." };
+  };
+
+  // * Resend verify email
+  // * Forgot password
+  // * Change password
+  // * Profile update
 
   refresh = async () => {
     // Token sent by client

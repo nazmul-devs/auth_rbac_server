@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { BaseMiddleware } from "../../base/BaseMiddleware";
-import { JwtUtil, TokenPayload } from "../../utils/jwt.util";
+import jwtUtils from "../../core/utils/jwt.utils";
 
 export class AuthenticateMiddleware extends BaseMiddleware {
   async handle(req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -12,7 +12,7 @@ export class AuthenticateMiddleware extends BaseMiddleware {
       }
 
       const token = authHeader.split(" ")[1];
-      const decoded = new JwtUtil().verify(token as string) as TokenPayload;
+      const decoded = jwtUtils.verifyRefreshToken(token as string);
 
       // Attach user info to request (for later use)
       (req as any).user = decoded;

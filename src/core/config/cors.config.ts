@@ -8,7 +8,7 @@ const productionOrigins = [
   "https://admin.your-production-domain.com",
 ];
 
-const localOrigins = ["http://localhost:3000"];
+const localOrigins = ["http://localhost:3000", "http://localhost:5000"];
 
 const allowedOrigins = isProduction ? productionOrigins : localOrigins;
 

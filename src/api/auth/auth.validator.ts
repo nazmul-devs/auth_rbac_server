@@ -27,6 +27,7 @@ export class AuthValidator extends BaseValidator {
   static signup = z.object({ body: this.signupSchema });
 
   static signin = z.object({ body: this.signinSchema });
+
   static verifyEmail = z.object({
     body: z.object({
       token: z

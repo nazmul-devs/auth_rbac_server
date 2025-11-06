@@ -7,7 +7,7 @@ export const requirePermission = (permissionName: string) => {
     if (!user) return res.status(401).json({ message: "Unauthenticated" });
 
     const roles = await prisma.userRole.findMany({
-      where: { userId: user.id },
+      where: { user_id: user.id },
       include: {
         role: { include: { permissions: { include: { permission: true } } } },
       },
