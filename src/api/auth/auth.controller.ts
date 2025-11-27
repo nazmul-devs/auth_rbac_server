@@ -26,6 +26,14 @@ export class AuthController extends BaseController {
     this.sendResponse(res, data);
   });
 
+  resendVerification = this.asyncHandler(
+    async (req: Request, res: Response) => {
+      const data = await this.service.resendVerification(req.body);
+
+      this.sendResponse(res, data);
+    }
+  );
+
   signout = this.asyncHandler(async (req: Request, res: Response) => {
     const authHeader = req.headers.authorization;
 
@@ -35,18 +43,20 @@ export class AuthController extends BaseController {
     const refreshToken = authHeader?.split(" ")[1];
     const trustedDeviceToken = req.headers?.trusteddevicetoken;
 
-    const data = await this.service.signout({
+    const payload = {
       refreshToken,
-      trustedDeviceToken,
-    });
+      trustedDeviceToken: trustedDeviceToken || "",
+    };
+
+    const data = await this.service.signout(payload);
 
     this.sendResponse(res, data);
   });
 
   refreshToken = this.asyncHandler(async (req: Request, res: Response) => {
-    const { body } = req;
+    const refreshToken = req.headers.authorization?.split(" ")[1] || "";
 
-    const data = await this.service.refreshToken(body);
+    const data = await this.service.refreshToken({ refreshToken });
 
     this.sendResponse(res, data);
   });

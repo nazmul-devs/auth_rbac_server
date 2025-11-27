@@ -8,8 +8,8 @@ import jwtUtils from "../../core/utils/jwt.utils";
 import { ServiceReturnDto } from "../../core/utils/responseHandler";
 import { AuthUtils } from "./auth.utils";
 import {
+  ResendVerificationDto,
   SigninDto,
-  SignoutDto,
   SignupDto,
   VerifyEmailDto,
 } from "./auth.validator";
@@ -18,11 +18,18 @@ type SignupFnDto = (payload: SignupDto["body"]) => Promise<ServiceReturnDto>;
 
 type SigninFnDto = (payload: SigninDto["body"]) => Promise<ServiceReturnDto>;
 
-type SignoutFnDto = (payload: SignoutDto["body"]) => Promise<ServiceReturnDto>;
+type SignoutFnDto = (payload: {
+  refreshToken: string | undefined;
+  trustedDeviceToken: string | string[];
+}) => Promise<ServiceReturnDto>;
 
 type SignoutAllDevicesFnDto = (payload: {
   userId: string;
 }) => Promise<ServiceReturnDto>;
+
+type ResendVerification = (
+  payload: ResendVerificationDto["body"]
+) => Promise<ServiceReturnDto>;
 
 type RefreshTokenFnDto = (payload: {
   refreshToken: string;
@@ -84,6 +91,58 @@ export class AuthService extends BaseService {
       statusCode: 201,
       message:
         "Registration successful. Please check your email for verification link.",
+      data: { verificationLink },
+    };
+  };
+  // ---------------------------
+  // 🧩 Resend email verification
+  // ---------------------------
+  resendVerification: ResendVerification = async (payload) => {
+    const { email } = payload;
+
+    // Check existing user
+    const existing = await this.db.user.findFirst({
+      where: { email },
+    });
+
+    if (!existing) {
+      throwValidation("Email not found.");
+    }
+
+    if (existing?.status === "ACTIVE") {
+      return {
+        statusCode: 200,
+        message: "Email already verified.",
+        data: {},
+      };
+    }
+
+    // Generate verification token
+    const verificationToken = crypto.randomBytes(32).toString("hex");
+    const verificationExpires = new Date(Date.now() + 1000 * 60 * 60 * 24); // 24 hours
+
+    // Update user
+    const user = await this.db.user.update({
+      where: { email },
+      data: {
+        verification_token: verificationToken,
+        verification_expires: verificationExpires,
+      },
+    });
+
+    // Prepare verification link
+    const verificationLink = `${config.CLIENT_URL}/verify-email?token=${verificationToken}`;
+
+    //  Send email
+    eventBus.publish("email_verification:signup", {
+      email: user.email,
+      name: user.name,
+      verificationLink,
+    });
+
+    return {
+      statusCode: 200,
+      message: "Email verification link sent. Please check your email.",
       data: { verificationLink },
     };
   };
@@ -183,16 +242,6 @@ export class AuthService extends BaseService {
       await this.cache.set(key, "valid", { ttl: 30 * 24 * 60 * 60 });
     }
 
-    // * revoked is a flag to mark tokens as invalid before expiry
-    // * Always store token_hash as a hashed value to prevent misuse if your DB is compromised
-
-    /* for logout
-    await this.db.refreshToken.update({
-  where: { token_hash: refreshToken },
-  data: { revoked: true }
-});
- */
-
     const hashedToken = crypto
       .createHash("sha256")
       .update(refreshToken)
@@ -250,7 +299,7 @@ export class AuthService extends BaseService {
 
     // If trusted device token exists → remove from Redis
     if (trustedDeviceToken) {
-      const decoded = jwtUtils.verifyToken(trustedDeviceToken);
+      const decoded = jwtUtils.verifyToken(trustedDeviceToken as string);
       const key = `trusted_device:${decoded.userId}:${trustedDeviceToken}`;
       await this.cache.del(key);
     }

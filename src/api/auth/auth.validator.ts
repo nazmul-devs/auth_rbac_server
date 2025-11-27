@@ -27,6 +27,9 @@ export class AuthValidator extends BaseValidator {
   static signup = z.object({ body: this.signupSchema });
 
   static signin = z.object({ body: this.signinSchema });
+  static resendVerification = z.object({
+    body: z.object({ email: z.string().email("Invalid email address") }),
+  });
 
   static verifyEmail = z.object({
     body: z.object({
@@ -41,4 +44,7 @@ export class AuthValidator extends BaseValidator {
 // @types
 export type SignupDto = z.infer<typeof AuthValidator.signup>;
 export type SigninDto = z.infer<typeof AuthValidator.signin>;
+export type ResendVerificationDto = z.infer<
+  typeof AuthValidator.resendVerification
+>;
 export type VerifyEmailDto = z.infer<typeof AuthValidator.verifyEmail>;

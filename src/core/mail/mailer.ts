@@ -62,6 +62,7 @@ class Mailer {
 
       await this.transporter.sendMail(mailOptions);
       logger.info(`Email sent to ${mailOptions.to}`);
+      slackService.sendMessage(`Email sent to ${mailOptions.to}`);
     } catch (error) {
       logger.error("Error sending email:", error);
       throw error;

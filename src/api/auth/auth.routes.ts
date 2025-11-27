@@ -118,7 +118,7 @@ export class AuthRoutes extends BaseRoute<AuthController> {
     /**
      * @swagger
      * /auth/refresh:
-     *   post:
+     *   get:
      *     summary: Refresh access token using refresh token
      *     tags: [Authentication]
      *     requestBody:
@@ -147,7 +147,7 @@ export class AuthRoutes extends BaseRoute<AuthController> {
      *       401:
      *         description: Invalid or expired refresh token
      */
-    this.router.post(
+    this.router.get(
       "/refresh-token",
       authenticate,
       this.controller.refreshToken
@@ -182,6 +182,11 @@ export class AuthRoutes extends BaseRoute<AuthController> {
       "/verify-email",
       validateRequest(AuthValidator.verifyEmail),
       this.controller.verifyEmail
+    );
+    this.router.post(
+      "/resend-verification",
+      validateRequest(AuthValidator.resendVerification),
+      this.controller.resendVerification
     );
 
     /**
