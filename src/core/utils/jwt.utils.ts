@@ -27,6 +27,17 @@ class JwtUtils {
   }
 
   /**
+   * Sign Service Token
+   */
+  public generateServiceToken(payload: object): string {
+    const options: SignOptions = {
+      expiresIn: this.jwtExpiresIn, // Can be longer if needed
+      algorithm: "HS256",
+    };
+    return jwt.sign({ ...payload, type: "service" }, this.jwtSecret, options);
+  }
+
+  /**
    * Verify Access Token Safely
    */
   public verifyToken<T = any>(token: string): T | null {

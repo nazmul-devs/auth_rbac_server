@@ -26,7 +26,12 @@ export const authMiddleware = (
     }
 
     const decoded = jwt.verifyToken(token);
-    req.user = decoded;
+
+    if (decoded && (decoded as any).type === "service") {
+      (req as any).service = decoded;
+    } else {
+      req.user = decoded;
+    }
 
     next();
   } catch (error: any) {

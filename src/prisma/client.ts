@@ -1,4 +1,4 @@
-import { PrismaClient } from "../generated/prisma";
+import { PrismaClient } from "@prisma/client";
 import { logger } from "../core/utils/logger";
 
 const prisma = new PrismaClient({
@@ -23,4 +23,4 @@ process.on("beforeExit", async () => {
 });
 
 export { prisma };
-export type { PrismaClient } from "../generated/prisma";
+export type { PrismaClient } from "@prisma/client";

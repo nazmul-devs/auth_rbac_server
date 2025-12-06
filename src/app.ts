@@ -6,6 +6,7 @@ import morgan from "morgan";
 import swaggerUi from "swagger-ui-express";
 import { AuthRoutes } from "./api/auth/auth.routes";
 import swaggerSpec from "./api/docs/swagger";
+import { UserRoutes } from "./api/user/user.routes";
 import { corsMiddleware } from "./core/config/cors.config";
 import { AppError } from "./core/errors/AppError";
 import { errorHandler } from "./core/errors/errorHandler";
@@ -57,6 +58,7 @@ app.get("/health", (_req: Request, res: Response) => {
 
 /* API Routes -------------------- */
 app.use("/api/v1/auth", new AuthRoutes().router);
+app.use("/api/v1/user", new UserRoutes().router);
 
 /* Swagger Docs (optional) -------------------- */
 if (process.env.NODE_ENV !== "production") {

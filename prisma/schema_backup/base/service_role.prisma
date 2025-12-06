@@ -1,0 +1,9 @@
+model ServiceRole {
+    id               String        @id @default(uuid())
+    service_client   ServiceClient @relation(fields: [service_client_id], references: [id])
+    service_client_id String
+    role             Role          @relation(fields: [role_id], references: [id])
+    role_id          String
+
+    @@unique([service_client_id, role_id])
+}

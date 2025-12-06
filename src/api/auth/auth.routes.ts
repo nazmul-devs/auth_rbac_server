@@ -3,13 +3,36 @@ import { authenticate } from "../middlewares/authenticate";
 import { validateRequest } from "../middlewares/validate-request";
 import { AuthController } from "./auth.controller";
 import { AuthValidator } from "./auth.validator";
+import { ServiceAuthController } from "./service.auth.controller";
+
+import { z } from "zod";
+
+const ServiceAuthValidator = {
+  getToken: z.object({
+    body: z.object({
+      clientId: z.string().min(1, "Client ID is required"),
+      clientSecret: z.string().min(1, "Client Secret is required"),
+      grantType: z.literal("client_credentials").default("client_credentials"),
+    }),
+  }),
+
+  registerService: z.object({
+    body: z.object({
+      name: z.string().min(1, "Service name is required"),
+      description: z.string().optional(),
+    }),
+  }),
+};
 
 export class AuthRoutes extends BaseRoute<AuthController> {
+  private serviceAuthController!: ServiceAuthController;
+
   constructor() {
     super(new AuthController());
   }
 
   protected initializeRoutes(): void {
+    this.serviceAuthController = new ServiceAuthController();
     /**
      * @swagger
      * /auth/signup:
@@ -114,6 +137,7 @@ export class AuthRoutes extends BaseRoute<AuthController> {
      *         description: Unauthorized
      */
     this.router.post("/signout", authenticate, this.controller.signout);
+    this.router.get("/me", authenticate, this.controller.me);
 
     /**
      * @swagger
@@ -374,5 +398,46 @@ export class AuthRoutes extends BaseRoute<AuthController> {
      *       401:
      *         description: Social authentication failed
      */
+    /**
+     * @swagger
+     * /auth/oauth/token:
+     *   post:
+     *     summary: Get access token for service (Client Credentials Grant)
+     *     tags: [Authentication]
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         application/json:
+     *           schema:
+     *             type: object
+     *             required:
+     *               - clientId
+     *               - clientSecret
+     *               - grantType
+     *             properties:
+     *               clientId:
+     *                 type: string
+     *               clientSecret:
+     *                 type: string
+     *               grantType:
+     *                 type: string
+     *                 default: client_credentials
+     *     responses:
+     *       200:
+     *         description: Access token generated
+     *       401:
+     *         description: Invalid credentials
+     */
+    this.router.post(
+      "/oauth/token",
+      validateRequest(ServiceAuthValidator.getToken),
+      this.serviceAuthController.getToken
+    );
+
+    this.router.post(
+      "/oauth/register",
+      // validateRequest(ServiceAuthValidator.registerService), // Add validation if open, usually protected
+      this.serviceAuthController.registerService
+    );
   }
 }

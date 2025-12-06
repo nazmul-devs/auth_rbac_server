@@ -53,6 +53,12 @@ export class AuthController extends BaseController {
     this.sendResponse(res, data);
   });
 
+  me = this.asyncHandler(async (req: Request, res: Response) => {
+    const data = await this.service.me({ userId: req.user?.id || "" });
+
+    this.sendResponse(res, data);
+  });
+
   refreshToken = this.asyncHandler(async (req: Request, res: Response) => {
     const refreshToken = req.headers.authorization?.split(" ")[1] || "";
 

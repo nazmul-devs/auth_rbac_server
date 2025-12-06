@@ -1,4 +1,4 @@
-import { UserStatus } from "../generated/prisma";
+import { UserStatus } from "@prisma/client";
 
 interface IUser {
   id: string;

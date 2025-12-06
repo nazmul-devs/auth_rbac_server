@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import { BaseService } from "../../base/BaseService";
-import { RefreshToken } from "../../generated/prisma";
+import { RefreshToken } from "@prisma/client";
 
 export class RefreshTokenService extends BaseService {
   private JWT_SECRET = process.env.JWT_SECRET!;

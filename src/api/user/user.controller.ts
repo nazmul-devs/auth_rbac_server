@@ -1,16 +1,18 @@
 import { Request, Response } from "express";
+import { BaseController } from "../../base/BaseController";
 import { UserService } from "./user.service";
 
-export class UserController {
-  constructor(private readonly userService: UserService) {}
+export class UserController extends BaseController {
+  private service: UserService;
 
-  async createUser(req: Request, res: Response) {
-    const user = await this.userService.create(req.body);
-    return res.status(201).json({ success: true, data: user });
+  constructor() {
+    super();
+    this.service = new UserService();
   }
 
-  async login(req: Request, res: Response) {
-    const token = await this.userService.login(req.body);
-    return res.json({ success: true, token });
-  }
+  me = this.asyncHandler(async (req: Request, res: Response) => {
+    const data = await this.service.me({ userId: req.user?.id || "" });
+
+    this.sendResponse(res, data);
+  });
 }

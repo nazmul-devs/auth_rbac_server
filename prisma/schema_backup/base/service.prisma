@@ -1,0 +1,11 @@
+model ServiceClient {
+    id                 String        @id @default(uuid())
+    client_id          String        @unique
+    client_secret_hash String
+    name               String
+    description        String?
+    is_active          Boolean       @default(true)
+    created_at         DateTime      @default(now())
+    updated_at         DateTime      @updatedAt
+    roles              ServiceRole[]
+}

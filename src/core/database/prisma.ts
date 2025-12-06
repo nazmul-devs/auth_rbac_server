@@ -1,5 +1,5 @@
 import { logger } from "../utils/logger";
-import { PrismaClient } from "../../generated/prisma";
+import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient({
   log: [
@@ -24,4 +24,4 @@ process.on("beforeExit", async () => {
 
 export { prisma };
 
-export type { PrismaClient } from "../../generated/prisma";
+export type { PrismaClient } from "@prisma/client";
