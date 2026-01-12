@@ -2,9 +2,9 @@ import fs from "fs";
 import handlebars from "handlebars";
 import nodemailer from "nodemailer";
 import path from "path";
-import { config } from "../config/env.config";
 import slackService from "../services/slack.service";
 import { logger } from "../utils/logger";
+import { mailConfig } from "./config/mail.config";
 
 class Mailer {
   private transporter: nodemailer.Transporter;
@@ -12,7 +12,7 @@ class Mailer {
   constructor() {
     this.transporter = nodemailer.createTransport({
       service: "gmail",
-      auth: config.nodemailer,
+      auth: mailConfig.smtp,
     });
   }
 
@@ -48,7 +48,7 @@ class Mailer {
       const html = await this.compileTemplate(templateName, templateData);
 
       const mailOptions = {
-        from: `Auth RBAC <${config.nodemailer.user}>`,
+        from: `Auth RBAC <${mailConfig.smtp.user}>`,
         to,
         subject,
         html,

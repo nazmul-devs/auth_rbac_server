@@ -1,10 +1,10 @@
 import Redis from "ioredis";
-import { config } from "../config/env.config";
 import { throwValidation } from "../errors/errors";
 import { logger } from "../utils/logger";
+import { redisConfig } from "../../config";
 
 // Create Redis client
-const redis = new Redis(config.redis.url, {
+const redis = new Redis(redisConfig.url, {
   retryStrategy: (times: number) => Math.min(times * 50, 2000), // retry delay up to 2s
   reconnectOnError: (err) => {
     const targetErrors = ["READONLY", "ECONNRESET"];

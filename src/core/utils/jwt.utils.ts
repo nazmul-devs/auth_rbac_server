@@ -1,5 +1,5 @@
 import jwt, { SignOptions } from "jsonwebtoken";
-import { config } from "../config/env.config";
+import { jwtConfig } from "../../config";
 
 class JwtUtils {
   private readonly jwtSecret: string;
@@ -8,10 +8,10 @@ class JwtUtils {
   private readonly refreshExpiry: any;
 
   constructor() {
-    this.jwtSecret = config.jwt.jwtSecret;
-    this.jwtExpiresIn = config.jwt.jwtExpiresIn || "15m";
-    this.refreshSecret = config.jwt.refreshSecret;
-    this.refreshExpiry = config.jwt.refreshExpiresIn || "7d";
+    this.jwtSecret = jwtConfig.access.secret;
+    this.jwtExpiresIn = jwtConfig.access.expiresIn || "15m";
+    this.refreshSecret = jwtConfig.refresh.secret;
+    this.refreshExpiry = jwtConfig.refresh.expiresIn || "7d";
   }
 
   /**

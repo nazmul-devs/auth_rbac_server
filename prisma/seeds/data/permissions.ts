@@ -1,26 +1,26 @@
 export const permissions = [
   // User Management
-  { name: "user.create", desc: "Create new users" },
-  { name: "user.read", desc: "View users" },
-  { name: "user.update", desc: "Update users" },
-  { name: "user.delete", desc: "Delete users" },
+  { resource: "user", action: "create", desc: "Create new users" },
+  { resource: "user", action: "read", desc: "View users" },
+  { resource: "user", action: "update", desc: "Update users" },
+  { resource: "user", action: "delete", desc: "Delete users" },
 
   // Role Management
-  { name: "role.create", desc: "Create new roles" },
-  { name: "role.read", desc: "View roles" },
-  { name: "role.update", desc: "Update roles" },
-  { name: "role.delete", desc: "Delete roles" },
+  { resource: "role", action: "create", desc: "Create new roles" },
+  { resource: "role", action: "read", desc: "View roles" },
+  { resource: "role", action: "update", desc: "Update roles" },
+  { resource: "role", action: "delete", desc: "Delete roles" },
 
   // Permission Management
-  { name: "permission.read", desc: "View permissions" },
+  { resource: "permission", action: "read", desc: "View permissions" },
 
   // System Administration
-  { name: "system.settings", desc: "Manage system settings" },
-  { name: "system.monitor", desc: "Monitor system health" },
+  { resource: "system", action: "settings", desc: "Manage system settings" },
+  { resource: "system", action: "monitor", desc: "Monitor system health" },
 
   // Content Management
-  { name: "content.create", desc: "Create content" },
-  { name: "content.read", desc: "View content" },
-  { name: "content.update", desc: "Update content" },
-  { name: "content.delete", desc: "Delete content" },
+  { resource: "content", action: "create", desc: "Create content" },
+  { resource: "content", action: "read", desc: "View content" },
+  { resource: "content", action: "update", desc: "Update content" },
+  { resource: "content", action: "delete", desc: "Delete content" },
 ];

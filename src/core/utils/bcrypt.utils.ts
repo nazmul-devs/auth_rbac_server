@@ -1,6 +1,6 @@
 // src/core/utils/bcrypt.util.ts
 import bcrypt from "bcrypt";
-import { config } from "../config/env.config";
+import { env } from "../../config";
 
 export class BcryptUtil {
   /**
@@ -9,7 +9,7 @@ export class BcryptUtil {
    * @returns Promise<string>
    */
   static async hash(password: string): Promise<string> {
-    const salt = await bcrypt.genSalt(config.SALT_ROUNDS);
+    const salt = await bcrypt.genSalt(env.BCRYPT_SALT_ROUNDS);
     return bcrypt.hash(password, salt);
   }
 

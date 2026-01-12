@@ -1,7 +1,7 @@
 import cors, { CorsOptions } from "cors";
-import { config } from "./env.config";
+import { env } from "../../config";
 
-const isProduction = config.nodeEnv === "production";
+const isProduction = env.NODE_ENV === "production";
 
 const productionOrigins = [
   "https://your-production-domain.com",

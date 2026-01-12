@@ -1,6 +1,6 @@
 import crypto from "crypto";
 import { BaseService } from "../../base/BaseService";
-import { config } from "../../core/config/env.config";
+import { env } from "../../config";
 import { throwValidation } from "../../core/errors/errors";
 import { eventBus } from "../../core/events/event-bul.service";
 import { BcryptUtil } from "../../core/utils/bcrypt.utils";
@@ -78,7 +78,7 @@ export class AuthService extends BaseService {
     });
 
     // Prepare verification link
-    const verificationLink = `${config.CLIENT_URL}/verify-email?token=${verificationToken}`;
+    const verificationLink = `${env.CLIENT_URL}/verify-email?token=${verificationToken}`;
 
     //  Send email
     eventBus.publish("email_verification:signup", {
@@ -131,7 +131,7 @@ export class AuthService extends BaseService {
     });
 
     // Prepare verification link
-    const verificationLink = `${config.CLIENT_URL}/verify-email?token=${verificationToken}`;
+    const verificationLink = `${env.CLIENT_URL}/verify-email?token=${verificationToken}`;
 
     //  Send email
     eventBus.publish("email_verification:signup", {

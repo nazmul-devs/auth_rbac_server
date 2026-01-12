@@ -10,13 +10,13 @@
  *
  */
 
-import { config } from "../config/env.config";
+import { env } from "../../config";
 
 class SlackService {
   async sendMessage(message: string) {
     const payload = { text: message };
 
-    const res = await fetch(config.slackWebhook!, {
+    const res = await fetch(env.SLACK_WEBHOOK_URL!, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
@@ -33,7 +33,7 @@ class SlackService {
       attachments: [{ text: JSON.stringify(data, null, 2) }],
     };
 
-    const res = await fetch(config.slackWebhook!, {
+    const res = await fetch(env.SLACK_WEBHOOK_URL!, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),

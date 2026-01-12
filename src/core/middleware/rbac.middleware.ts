@@ -15,7 +15,7 @@ export const requirePermission = (permissionName: string) => {
 
     const perms = new Set<string>();
     roles.forEach((ur) => {
-      ur.role.permissions.forEach((rp) => perms.add(rp.permission.name));
+      ur.role.permissions.forEach((rp: any) => perms.add(rp.permission.name));
     });
 
     if (!perms.has(permissionName))

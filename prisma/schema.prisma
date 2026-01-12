@@ -9,7 +9,7 @@ datasource db {
 
 // User Models
 model User {
-    id                   String         @id @default(uuid())
+    id                   String         @id @default(cuid())
     name                 String?
     mobile               String?
     email                String         @unique
@@ -41,8 +41,19 @@ enum UserStatus {
 }
 
 // Role Models
+enum PermissionAction {
+  CREATE
+  READ
+  UPDATE
+  DELETE
+}
+
+
+
+
+
 model Role {
-    id          String           @id @default(uuid())
+    id          String           @id @default(cuid())
     name        String           @unique
     description String?
     permissions RolePermission[]
@@ -51,40 +62,46 @@ model Role {
 }
 
 model Permission {
-    id    String           @id @default(uuid())
-    name  String           @unique
-    desc  String?
-    roles RolePermission[]
+  id        String @id @default(uuid())
+  resource  String // e.g. "booking", "flight", "user"
+  action    PermissionAction
+
+  roles     RolePermission[]
+
+  @@unique([resource, action])
 }
+
 
 model UserRole {
-    id      String @id @default(uuid())
-    user    User   @relation(fields: [user_id], references: [id])
-    user_id String
-    role    Role   @relation(fields: [role_id], references: [id])
-    role_id String
+  user_id String
+  role_id String
 
-    @@unique([user_id, role_id])
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  role Role @relation(fields: [role_id], references: [id], onDelete: Cascade)
+
+  @@id([user_id, role_id])
 }
+
 
 model RolePermission {
-    id            String     @id @default(uuid())
-    role          Role       @relation(fields: [role_id], references: [id])
-    role_id       String
-    permission    Permission @relation(fields: [permission_id], references: [id])
-    permission_id String
+  role_id       String
+  permission_id String
 
-    @@unique([role_id, permission_id])
+  role       Role       @relation(fields: [role_id], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permission_id], references: [id], onDelete: Cascade)
+
+  @@id([role_id, permission_id])
 }
 
+
 model RefreshToken {
-    id             String   @id @default(uuid())
+    id             String   @id @default(cuid())
     token_hash     String   @unique
     user_id        String
     revoked        Boolean  @default(false)
     created_at     DateTime @default(now())
-    device_id      String? 
-    device_name    String? 
+    device_id      String?
+    device_name    String?
     replaced_by_id String?
     expires_at     DateTime
     user           User     @relation(fields: [user_id], references: [id])
@@ -92,7 +109,7 @@ model RefreshToken {
 
 // Service Models
 model ServiceClient {
-    id                 String        @id @default(uuid())
+    id                 String        @id @default(cuid())
     client_id          String        @unique
     client_secret_hash String
     name               String
@@ -104,7 +121,7 @@ model ServiceClient {
 }
 
 model ServiceRole {
-    id               String        @id @default(uuid())
+    id               String        @id @default(cuid())
     service_client   ServiceClient @relation(fields: [service_client_id], references: [id])
     service_client_id String
     role             Role          @relation(fields: [role_id], references: [id])
