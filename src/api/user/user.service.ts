@@ -1,4 +1,4 @@
-import { BaseService } from "../../base/BaseService";
+import { BaseService } from "../../base/base.service";
 
 export class UserService extends BaseService {
   me = async (payload: { userId: string }) => {

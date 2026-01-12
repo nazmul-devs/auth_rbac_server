@@ -1,12 +1,11 @@
 import { z } from "zod";
 
-export class BaseValidator {
-  // ===== Common Fields =====
-  static id = z.string().min(10);
+export const baseValidator = {
+  id: z.string().min(10),
 
-  static email = z.string().email("Invalid email address");
+  email: z.string().email("Invalid email address"),
 
-  static password = z
+  password: z
     .string()
     .min(8, "Password must be at least 8 characters long")
     .regex(/[A-Z]/, "Must contain at least one uppercase letter")
@@ -15,26 +14,22 @@ export class BaseValidator {
     .regex(
       /[!@#$%^&*(),.?":{}|<>]/,
       "Must contain at least one special character"
-    );
+    ),
 
-  static phone = z
-    .string()
-    .regex(/^\+?\d{7,15}$/, "Invalid phone number format");
+  phone: z.string().regex(/^\+?\d{7,15}$/, "Invalid phone number format"),
 
-  static boolean = z.boolean().optional();
+  boolean: z.boolean(),
 
-  static status = z.enum(["ACTIVE", "INACTIVE", "DELETED"]);
+  status: z.enum(["ACTIVE", "INACTIVE", "DELETED"]),
 
-  // ===== Common Filters =====
-  static pagination = z.object({
+  pagination: z.object({
     page: z.coerce.number().int().min(1).default(1),
     limit: z.coerce.number().int().min(1).max(100).default(10),
     search: z.string().optional(),
-  });
+  }),
 
-  // ===== Common Dates =====
-  static date = z.coerce.date();
+  date: z.coerce.date(),
 
-  static createdAt = z.string().datetime().optional();
-  static updatedAt = z.string().datetime().optional();
-}
+  createdAt: z.string().datetime(),
+  updatedAt: z.string().datetime(),
+};

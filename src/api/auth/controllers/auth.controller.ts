@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
-import { BaseController } from "../../base/BaseController";
-import { AuthService } from "./auth.service";
+import { BaseController } from "../../../base";
+import { AuthService } from "../services/auth.service";
 
 export class AuthController extends BaseController {
   private service: AuthService;
@@ -28,7 +28,7 @@ export class AuthController extends BaseController {
 
   resendVerification = this.asyncHandler(
     async (req: Request, res: Response) => {
-      const data = await this.service.resendVerification(req.body);
+      const data = await this.service.refresh(req.body);
 
       this.sendResponse(res, data);
     }
@@ -54,7 +54,8 @@ export class AuthController extends BaseController {
   });
 
   me = this.asyncHandler(async (req: Request, res: Response) => {
-    const data = await this.service.me({ userId: req.user?.id || "" });
+    const userId = req?.user?.id as string;
+    const data = await this.service.me(userId);
 
     this.sendResponse(res, data);
   });

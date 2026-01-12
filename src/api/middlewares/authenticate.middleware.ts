@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { BaseMiddleware } from "../../base/BaseMiddleware";
+import { BaseMiddleware } from "../../base/base.middleware";
 import jwtUtils from "../../core/utils/jwt.utils";
 
 export class AuthenticateMiddleware extends BaseMiddleware {

@@ -1,4 +1,4 @@
-import { BaseRoute } from "../../base/BaseRoute";
+import { BaseRoute } from "../../base/base.route";
 import { authenticate } from "../middlewares/authenticate";
 import { UserController } from "./user.controller";
 

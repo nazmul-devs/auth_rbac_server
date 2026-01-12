@@ -1,7 +1,6 @@
 import { z } from "zod";
-import { BaseValidator } from "../../base/BaseValidator";
 
-export class UserValidator extends BaseValidator {
+class UserValidator {
   protected schema = z.object({
     body: z.object({
       name: z.string().min(3, "Name must be at least 3 characters"),
@@ -19,3 +18,5 @@ export class UserValidator extends BaseValidator {
     }),
   });
 }
+
+export default new UserValidator();
