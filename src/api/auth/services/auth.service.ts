@@ -1,21 +1,21 @@
 import crypto from "crypto";
 import { authService } from ".";
-import { BaseService } from "../../../base";
 import { throwValidation } from "../../../core/errors/errors";
 import { eventBus } from "../../../core/events/event-bul.service";
 import { BcryptUtil } from "../../../core/utils/bcrypt.utils";
 import jwtUtils from "../../../core/utils/jwt.utils";
 import { ServiceReturnDto } from "../../../core/utils/responseHandler";
-import { authConfig } from "../config/auth.config";
-import { authConstants } from "../constants/auth.constants";
+import { authConfig } from "../auth.config";
+import { authConstants } from "../auth.constants";
+import { AuthUtils } from "../utils/auth.utils";
+import { randomToken } from "../utils/hash.util";
+import { generateAccessToken } from "../utils/token.util";
 import {
   GetServiceTokenPayload,
   RegisterServicePayload,
   SERVICE_GRANT_TYPE,
-} from "../types/auth.types";
-import { AuthUtils } from "../utils/auth.utils";
-import { randomToken } from "../utils/hash.util";
-import { generateAccessToken } from "../utils/token.util";
+} from "../auth.types";
+import { BaseService } from "../../../core/base";
 
 export class AuthService extends BaseService {
   async signup(payload: any) {

@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { baseValidator } from "../../../base";
+import { baseValidator } from "../../core/base";
 /* =========================
    Internal Schemas
 ========================= */

@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
-import { BaseController } from "../../../base";
-import { authService } from "../services";
+import { authService } from "./services";
+import { BaseController } from "../../core/base";
 
 export class AuthController extends BaseController {
   constructor() {

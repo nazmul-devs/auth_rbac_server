@@ -1,6 +1,6 @@
 import { Application } from "express";
 import swaggerUi from "swagger-ui-express";
-import { AuthRoutes } from "../api/auth/routes/auth.routes";
+import { AuthRoutes } from "../api/auth/auth.routes";
 import { UserRoutes } from "../api/user/user.routes";
 import { swaggerSpec } from "../docs/swagger";
 

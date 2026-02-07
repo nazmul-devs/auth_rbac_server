@@ -1,7 +1,7 @@
-import { BaseRoute } from "../../../base";
-import { authenticate, validateRequest } from "../../../core/middlewares";
-import { AuthController } from "../controllers/auth.controller";
-import { authValidator } from "../validators/auth.validator";
+import { BaseRoute } from "../../core/base";
+import { authenticate, validateRequest } from "../../core/middlewares";
+import { AuthController } from "./auth.controller";
+import { authValidator } from "./auth.validator";
 
 /**
  * Authentication & Authorization Routes

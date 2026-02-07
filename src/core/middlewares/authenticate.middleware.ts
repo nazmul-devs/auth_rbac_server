@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
-import { BaseMiddleware } from "../../base/base.middleware";
 import jwtUtils from "../../core/utils/jwt.utils";
+import { BaseMiddleware } from "../base";
 
 export class AuthenticateMiddleware extends BaseMiddleware {
   async handle(req: Request, res: Response, next: NextFunction): Promise<void> {

@@ -1,5 +1,5 @@
-import { BaseService } from "../../../base";
-import { authConfig } from "../config/auth.config";
+import { BaseService } from "../../../core/base";
+import { authConfig } from "../auth.config";
 import { randomToken, sha256 } from "../utils/hash.util";
 
 export class RefreshTokenService extends BaseService {
@@ -7,7 +7,7 @@ export class RefreshTokenService extends BaseService {
     const token = randomToken();
     const hash = sha256(token);
     const expiresAt = new Date(
-      Date.now() + authConfig.REFRESH_TOKEN_EXPIRES_MS
+      Date.now() + authConfig.REFRESH_TOKEN_EXPIRES_MS,
     );
 
     await this.db.refreshToken.create({
@@ -20,7 +20,7 @@ export class RefreshTokenService extends BaseService {
   async rotate(oldToken: string) {
     const hash = sha256(oldToken);
 
-    return this.db.$transaction(async (tx) => {
+    return this.db.$transaction(async (tx: any) => {
       const record = await tx.refreshToken.findFirst({
         where: { token_hash: hash },
       });
@@ -36,7 +36,7 @@ export class RefreshTokenService extends BaseService {
       const newToken = randomToken();
       const newHash = sha256(newToken);
       const expiresAt = new Date(
-        Date.now() + authConfig.REFRESH_TOKEN_EXPIRES_MS
+        Date.now() + authConfig.REFRESH_TOKEN_EXPIRES_MS,
       );
 
       await tx.refreshToken.create({

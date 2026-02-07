@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { authValidator } from "../validators/auth.validator";
+import { authValidator } from "./auth.validator";
 
 export type SignupDto = z.infer<typeof authValidator.signup>["body"];
 export type SigninDto = z.infer<typeof authValidator.signin>["body"];
