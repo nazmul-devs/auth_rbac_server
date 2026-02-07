@@ -1,5 +1,5 @@
 import { BaseRoute } from "../../base/base.route";
-import { authenticate } from "../middlewares/authenticate";
+import { authenticate } from "../../core/middlewares";
 import { UserController } from "./user.controller";
 
 export class UserRoutes extends BaseRoute<UserController> {

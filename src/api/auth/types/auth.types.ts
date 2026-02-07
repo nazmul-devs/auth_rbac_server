@@ -7,7 +7,16 @@ export type ResendVerificationDto = z.infer<
   typeof authValidator.resendVerification
 >["body"];
 export type VerifyEmailDto = z.infer<typeof authValidator.verifyEmail>["body"];
-export type GetTokenDto = z.infer<typeof authValidator.getToken>["body"];
-export type RegisterServiceDto = z.infer<
-  typeof authValidator.registerService
->["body"];
+
+export const SERVICE_GRANT_TYPE = "client_credentials" as const;
+
+export interface GetServiceTokenPayload {
+  clientId: string;
+  clientSecret: string;
+  grantType: typeof SERVICE_GRANT_TYPE;
+}
+
+export interface RegisterServicePayload {
+  name: string;
+  description?: string;
+}

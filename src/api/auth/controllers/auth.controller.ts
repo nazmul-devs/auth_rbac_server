@@ -1,19 +1,16 @@
 import { Request, Response } from "express";
 import { BaseController } from "../../../base";
-import { AuthService } from "../services/auth.service";
+import { authService } from "../services";
 
 export class AuthController extends BaseController {
-  private service: AuthService;
-
   constructor() {
     super();
-    this.service = new AuthService();
   }
 
   signup = this.asyncHandler(async (req: Request, res: Response) => {
     const { body } = req.validatedData;
 
-    const data = await this.service.signup(body);
+    const data = await authService.auth.signup(body);
 
     this.sendResponse(res, data);
   });
@@ -21,17 +18,17 @@ export class AuthController extends BaseController {
   signin = this.asyncHandler(async (req: Request, res: Response) => {
     const { body } = req.validatedData;
 
-    const data = await this.service.signin(body);
+    const data = await authService.auth.signin(body);
 
     this.sendResponse(res, data);
   });
 
   resendVerification = this.asyncHandler(
     async (req: Request, res: Response) => {
-      const data = await this.service.refresh(req.body);
+      const data = await authService.auth.refresh(req.body);
 
       this.sendResponse(res, data);
-    }
+    },
   );
 
   signout = this.asyncHandler(async (req: Request, res: Response) => {
@@ -48,14 +45,14 @@ export class AuthController extends BaseController {
       trustedDeviceToken: trustedDeviceToken || "",
     };
 
-    const data = await this.service.signout(payload);
+    const data = await authService.auth.signout(payload);
 
     this.sendResponse(res, data);
   });
 
   me = this.asyncHandler(async (req: Request, res: Response) => {
     const userId = req?.user?.id as string;
-    const data = await this.service.me(userId);
+    const data = await authService.auth.me(userId);
 
     this.sendResponse(res, data);
   });
@@ -63,7 +60,7 @@ export class AuthController extends BaseController {
   refreshToken = this.asyncHandler(async (req: Request, res: Response) => {
     const refreshToken = req.headers.authorization?.split(" ")[1] || "";
 
-    const data = await this.service.refreshToken({ refreshToken });
+    const data = await authService.auth.refreshToken({ refreshToken });
 
     this.sendResponse(res, data);
   });
@@ -71,7 +68,7 @@ export class AuthController extends BaseController {
   verifyEmail = this.asyncHandler(async (req: Request, res: Response) => {
     const { body } = req.validatedData;
 
-    const data = await this.service.verifyEmail(body);
+    const data = await authService.auth.verifyEmail(body);
 
     this.sendResponse(res, data);
   });

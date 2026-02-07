@@ -1,20 +1,23 @@
 import crypto from "crypto";
+import { authService } from ".";
 import { BaseService } from "../../../base";
 import { throwValidation } from "../../../core/errors/errors";
 import { eventBus } from "../../../core/events/event-bul.service";
 import { BcryptUtil } from "../../../core/utils/bcrypt.utils";
 import jwtUtils from "../../../core/utils/jwt.utils";
+import { ServiceReturnDto } from "../../../core/utils/responseHandler";
 import { authConfig } from "../config/auth.config";
+import { authConstants } from "../constants/auth.constants";
+import {
+  GetServiceTokenPayload,
+  RegisterServicePayload,
+  SERVICE_GRANT_TYPE,
+} from "../types/auth.types";
 import { AuthUtils } from "../utils/auth.utils";
 import { randomToken } from "../utils/hash.util";
 import { generateAccessToken } from "../utils/token.util";
-import { RefreshTokenService } from "./refresh-token.service";
-import { TrustedDeviceService } from "./trusted-device.service";
 
 export class AuthService extends BaseService {
-  private refreshTokenService = new RefreshTokenService();
-  private trustedDeviceService = new TrustedDeviceService();
-
   async signup(payload: any) {
     const { name, email, password, username } = payload;
 
@@ -30,7 +33,7 @@ export class AuthService extends BaseService {
 
     const verifyToken = randomToken(32);
     const verifyExpires = new Date(
-      Date.now() + authConfig.EMAIL_VERIFY_EXPIRES_MS
+      Date.now() + authConfig.EMAIL_VERIFY_EXPIRES_MS,
     );
 
     const user = await this.db.user.create({
@@ -74,11 +77,11 @@ export class AuthService extends BaseService {
       username: user?.username,
     });
 
-    const refreshToken = await this.refreshTokenService.createToken(user?.id);
+    const refreshToken = await authService.refreshToken.createToken(user?.id);
 
     let trustedDeviceToken = null;
     if (trustDevice) {
-      trustedDeviceToken = await this.trustedDeviceService.markTrusted(user.id);
+      trustedDeviceToken = await authService.trustedDevice.markTrusted(user.id);
     }
 
     return {
@@ -90,7 +93,7 @@ export class AuthService extends BaseService {
   async refresh(payload: any) {
     const { refreshToken } = payload;
 
-    const result = await this.refreshTokenService.rotate(refreshToken);
+    const result = await authService.refreshToken.rotate(refreshToken);
 
     const accessToken = generateAccessToken({ id: result.userId });
 
@@ -102,10 +105,10 @@ export class AuthService extends BaseService {
 
   async signout(payload: any) {
     if (payload.refreshToken)
-      await this.refreshTokenService.revoke(payload.refreshToken);
+      await authService.refreshToken.revoke(payload.refreshToken);
 
     if (payload.trustedDeviceToken)
-      await this.trustedDeviceService.revoke(payload.trustedDeviceToken);
+      await authService.trustedDevice.revoke(payload.trustedDeviceToken);
 
     return { message: "Signout successful" };
   }
@@ -160,7 +163,7 @@ export class AuthService extends BaseService {
     // Expired token -> Force login
     if (storedToken.expires_at < new Date())
       return this.throwUnauthorized(
-        "Refresh token expired. Please login again."
+        "Refresh token expired. Please login again.",
       );
 
     // ✅ Token is valid → Rotate it (Revoke old one & create new one)
@@ -241,6 +244,102 @@ export class AuthService extends BaseService {
 
     return { message: "Email verified successfully. You can now sign in." };
   };
+
+  /**
+   * OAuth2 Client Credentials Grant
+   */
+  async getToken(payload: GetServiceTokenPayload): Promise<ServiceReturnDto> {
+    const { clientId, clientSecret, grantType } = payload;
+
+    if (grantType !== SERVICE_GRANT_TYPE) {
+      return this.throwError(
+        `Invalid grant type. Expected '${SERVICE_GRANT_TYPE}'.`,
+      );
+    }
+
+    const serviceClient = await this.db.serviceClient.findUnique({
+      where: { client_id: clientId },
+    });
+
+    if (!serviceClient || !serviceClient.is_active) {
+      return this.throwUnauthorized("Invalid client credentials.");
+    }
+
+    const incomingHash = crypto
+      .createHash("sha256")
+      .update(clientSecret)
+      .digest("hex");
+
+    /**
+     * Timing-safe comparison to prevent side-channel attacks
+     */
+    const isSecretValid = crypto.timingSafeEqual(
+      Buffer.from(incomingHash),
+      Buffer.from(serviceClient.client_secret_hash),
+    );
+
+    if (!isSecretValid) {
+      return this.throwUnauthorized("Invalid client credentials.");
+    }
+
+    const accessToken = jwtUtils.generateServiceToken({
+      serviceId: serviceClient.id,
+      clientId: serviceClient.client_id,
+      name: serviceClient.name,
+    });
+
+    return {
+      statusCode: 200,
+      message: "Access token generated successfully.",
+      data: {
+        accessToken,
+        tokenType: "Bearer",
+        expiresIn: authConstants.SERVICE_TOKEN_EXPIRES_IN,
+      },
+    };
+  }
+
+  /**
+   * Register internal or third-party service
+   */
+  async registerService(
+    payload: RegisterServicePayload,
+  ): Promise<ServiceReturnDto> {
+    const { name, description } = payload;
+
+    const clientId = `svc_${crypto.randomBytes(8).toString("hex")}`;
+    const clientSecret = crypto.randomBytes(32).toString("hex");
+
+    const clientSecretHash = crypto
+      .createHash("sha256")
+      .update(clientSecret)
+      .digest("hex");
+
+    const serviceClient = await this.db.serviceClient.create({
+      data: {
+        name,
+        description,
+        client_id: clientId,
+        client_secret_hash: clientSecretHash,
+        is_active: true,
+      },
+    });
+
+    /**
+     * IMPORTANT:
+     * clientSecret is returned ONLY once.
+     * Never store or show again.
+     */
+    return {
+      statusCode: 201,
+      message: "Service client registered successfully.",
+      data: {
+        clientId: serviceClient.client_id,
+        clientSecret,
+        name: serviceClient.name,
+      },
+    };
+  }
 
   // * Resend verify email
   // * Forgot password

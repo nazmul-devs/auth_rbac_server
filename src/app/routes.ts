@@ -1,8 +1,8 @@
 import { Application } from "express";
 import swaggerUi from "swagger-ui-express";
-import { AuthRoutes } from "../api/auth";
-import { swaggerSpec } from "../api/docs/swagger";
+import { AuthRoutes } from "../api/auth/routes/auth.routes";
 import { UserRoutes } from "../api/user/user.routes";
+import { swaggerSpec } from "../docs/swagger";
 
 export const registerRoutes = (app: Application) => {
   app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));

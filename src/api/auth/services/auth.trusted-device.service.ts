@@ -1,5 +1,5 @@
-import { BaseService } from "../../../base";
 import jwt from "jsonwebtoken";
+import { BaseService } from "../../../base";
 import { authConfig } from "../config/auth.config";
 
 export class TrustedDeviceService extends BaseService {
@@ -7,7 +7,7 @@ export class TrustedDeviceService extends BaseService {
     const token = jwt.sign(
       { userId, deviceId: crypto.randomUUID() },
       process.env.JWT_SECRET!,
-      { expiresIn: "30d" }
+      { expiresIn: "30d" },
     );
 
     const key = `trusted_device:${userId}:${token}`;
@@ -24,7 +24,7 @@ export class TrustedDeviceService extends BaseService {
   async isTrusted(token: string) {
     const payload = jwt.verify(token, process.env.JWT_SECRET!) as any;
     return Boolean(
-      await this.cache.get(`trusted_device:${payload.userId}:${token}`)
+      await this.cache.get(`trusted_device:${payload.userId}:${token}`),
     );
   }
 }
